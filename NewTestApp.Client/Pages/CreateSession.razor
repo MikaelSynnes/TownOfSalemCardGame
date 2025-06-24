@@ -1,0 +1,269 @@
+@page "/create-session"
+@using NewTestApp.Shared
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.SignalR.Client
+@using NewTestApp.Client.Shared
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@inject HttpClient Http
+@inject SessionState SessionState
+@inject IJSRuntime JS
+
+<h3>Create Session</h3>
+
+@if (SessionId == null)
+{
+    <EditForm Model="sessionRequest" OnValidSubmit="CreateSessionHandler">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label>Username:</label>
+            <InputText @bind-Value="sessionRequest.Username" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Create Session</button>
+    </EditForm>
+}
+else
+{
+    <div class="alert alert-success">
+        <strong>Session Created!</strong><br />
+        Session ID: <span class="fw-bold">@SessionId</span>
+    </div>
+    <p>Share this code with others to join your session.</p>
+    <button class="btn btn-secondary mt-2" @onclick="RefreshSession">Refresh User List</button>
+    <h5 class="mt-4">Participants:</h5>
+    @if (Session != null)
+    {
+        <ul>
+            @foreach (var user in @Session.Participants)
+            {
+                <li>@user</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No participants found.</p>
+    }
+
+    @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username)
+    {
+        <h5 class="mt-4">Assign Roles</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Description</th>
+                    <th>Count</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var role in AvailableRoles)
+                {
+                    <tr>
+                        <td>@role.Name</td>
+                        <td>@role.Description</td>
+                        <td>@role.Count</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary me-1" @onclick="() => DecreaseRole(role)">-</button>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => IncreaseRole(role)">+</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button class="btn btn-success" @onclick="StartGame">Start Game</button>
+    }
+
+    // UI section for manager to see all player roles
+    @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username && PlayerAssignments != null)
+    {
+        <div class="alert alert-info mt-4">
+            <strong>Player Roles:</strong>
+            <table class="table table-bordered mt-2">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Role</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var assignment in PlayerAssignments)
+                    {
+                        <tr>
+                            <td>@assignment.Player</td>
+                            <td>@assignment.Role?.Name</td>
+                            <td>@assignment.Role?.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private SessionRequest sessionRequest = new();
+    private string? SessionId;
+    private Session? Session;
+    private HubConnection? hubConnection;
+
+    // Role selection for manager
+    private List<RoleInfo> AvailableRoles = new()
+    {
+        new RoleInfo { Name = "Mafia", Description = "A member of the mafia. Eliminate citizens and avoid detection.", Count = 0 },
+        new RoleInfo { Name = "Citizen", Description = "An innocent citizen. Find and vote out the mafia.", Count = 0 },
+        new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine their role.", Count = 0 }
+    };
+
+    // Holds player-role assignments for the manager
+    private List<PlayerRoleAssignment>? PlayerAssignments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Try to restore session from cookie
+        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "SessionId");
+        var username = await JS.InvokeAsync<string>("sessionCookie.get", "Username");
+        if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
+        {
+            sessionRequest.Username = username;
+            SessionId = sessionId;
+            await StartSignalR();
+            await RefreshSession();
+        }
+    }
+
+    private async Task CreateSessionHandler()
+    {
+        var response = await Http.PostAsJsonAsync("api/session/create", sessionRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            var rawSessionId = await response.Content.ReadAsStringAsync();
+            SessionId = rawSessionId.Trim('"');
+            await JS.InvokeVoidAsync("sessionCookie.set", "SessionId", SessionId, 7);
+            await JS.InvokeVoidAsync("sessionCookie.set", "Username", sessionRequest.Username, 7);
+            await StartSignalR();
+            await RefreshSession();
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+
+    private string GetSignalRHubUrl()
+    {
+        // Prefer Http.BaseAddress if set, else use NavigationManager.BaseUri
+        var baseUri = Http.BaseAddress?.ToString()?.TrimEnd('/') ?? NavigationManager.BaseUri.TrimEnd('/');
+        // If the client is running on https, ensure the hub URL is also https
+        var hubUrl = baseUri.Replace("http://", NavigationManager.Uri.StartsWith("https://") ? "https://" : "http://");
+        return $"{hubUrl}/sessionHub";
+    }
+
+    private async Task StartSignalR()
+    {
+        if (SessionId == null) return;
+        var hubUrl = GetSignalRHubUrl();
+        _ = JS.InvokeVoidAsync("console.log", $"Connecting to SignalR hub at: {hubUrl}");
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl)
+            .WithAutomaticReconnect()
+            .Build();
+        hubConnection.On<object>("UserJoined", (data) =>
+        {
+            _ = JS.InvokeVoidAsync("console.log", $"SignalR UserJoined message received. Raw data: {System.Text.Json.JsonSerializer.Serialize(data)}");
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            Session? updatedSession = null;
+            if (data is System.Text.Json.JsonElement element && element.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                if (element.TryGetProperty("Session", out var sessionElement))
+                {
+                    var json = sessionElement.GetRawText();
+                    updatedSession = System.Text.Json.JsonSerializer.Deserialize<Session>(json, options);
+                }
+                else
+                {
+                    // Fallback: try to deserialize the whole object
+                    var json = element.GetRawText();
+                    updatedSession = System.Text.Json.JsonSerializer.Deserialize<Session>(json, options);
+                }
+            }
+            if (updatedSession != null)
+            {
+                // Always assign a new object reference
+                Session = new Session
+                {
+                    SessionId = updatedSession.SessionId,
+                    ManagerUsername = updatedSession.ManagerUsername,
+                    Participants = updatedSession.Participants != null ? new List<string>(updatedSession.Participants) : new List<string>()
+                };
+                _ = JS.InvokeVoidAsync("console.log", $"Session updated (new object): {System.Text.Json.JsonSerializer.Serialize(Session)}");
+                StateHasChanged();
+            }
+        });
+        hubConnection.On<object>("ReceiveAllRoles", (data) =>
+        {
+            _ = JS.InvokeVoidAsync("console.log", $"SignalR ReceiveAllRoles message received. Raw data: {System.Text.Json.JsonSerializer.Serialize(data)}");
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var assignments = new List<PlayerRoleAssignment>();
+            if (data is System.Text.Json.JsonElement arr && arr.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var item in arr.EnumerateArray())
+                {
+                    var player = item.GetProperty("player").GetString();
+                    var roleObj = item.GetProperty("role");
+                    var role = new RoleInfo
+                    {
+                        Name = roleObj.GetProperty("name").GetString() ?? string.Empty,
+                        Description = roleObj.GetProperty("description").GetString() ?? string.Empty
+                    };
+                    assignments.Add(new PlayerRoleAssignment { Player = player, Role = role });
+                }
+            }
+            SessionState.PlayerAssignments = assignments;
+            StateHasChanged();
+            NavigationManager.NavigateTo("/session-roles", false);
+        });
+        await hubConnection.StartAsync();
+        await hubConnection.InvokeAsync("SubscribeToSession", SessionId);
+    }
+
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
+    private async Task RefreshSession()
+    {
+        if (!string.IsNullOrEmpty(SessionId))
+        {
+            var cleanSessionId = SessionId.Trim('"');
+            Session = await Http.GetFromJsonAsync<Session>($"api/session/{cleanSessionId}");
+        }
+    }
+
+    private async Task StartGame()
+    {
+        var startRequest = new StartGameRequest
+        {
+            SessionId = SessionId!,
+            Roles = AvailableRoles
+                .Where(r => r.Count > 0) // Only include roles with Count > 0
+                .Select(r => new RoleInfo { Name = r.Name, Description = r.Description, Count = r.Count })
+                .ToList()
+        };
+        var response = await Http.PostAsJsonAsync("api/session/start", startRequest);
+        if (!response.IsSuccessStatusCode)
+        {
+            // Handle error (e.g., show message)
+        }
+    }
+
+    private void IncreaseRole(RoleInfo role)
+    {
+        role.Count++;
+    }
+    private void DecreaseRole(RoleInfo role)
+    {
+        if (role.Count > 0) role.Count--;
+    }
+}
