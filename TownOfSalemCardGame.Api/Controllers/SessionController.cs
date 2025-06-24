@@ -48,6 +48,7 @@ namespace TownOfSalemCardGame.Api.Controllers
         {
             if (_sessions.TryGetValue(req.SessionId, out var session))
             {
+                session.IsStarted = true;
                 var allPlayers = new List<string>(session.Participants); // Manager is NOT included
                 var roles = new List<RoleInfo>();
                 foreach (var role in req.Roles)
@@ -60,17 +61,17 @@ namespace TownOfSalemCardGame.Api.Controllers
                 }
                 var rng = new Random();
                 roles = roles.OrderBy(_ => rng.Next()).ToList();
-                var assignments = new List<object>();
+                var assignments = new List<PlayerRoleAssignment>();
                 for (int i = 0; i < allPlayers.Count; i++)
                 {
                     string player = allPlayers[i];
                     var role = roles[i];
                     string group = $"{req.SessionId}_{player}";
                     await _hubContext.Clients.Group(group).SendAsync("ReceiveRole", new { role.Name, role.Description });
-                    assignments.Add(new { Player = player, Role = new { role.Name, role.Description } });
+                    assignments.Add(new PlayerRoleAssignment { Player = player, Role = new RoleInfo { Name = role.Name, Description = role.Description } });
                     _logger.LogInformation($"Assigned role {role.Name} to {player} in session {req.SessionId}");
                 }
-                // Send all assignments to the manager only
+                session.Assignments = assignments;
                 await _hubContext.Clients.Group(req.SessionId).SendAsync("ReceiveAllRoles", assignments);
                 return Ok();
             }
@@ -99,6 +100,17 @@ namespace TownOfSalemCardGame.Api.Controllers
         {
             if (_sessions.TryGetValue(sessionId, out var session))
                 return Ok(session);
+            return NotFound();
+        }
+
+        [HttpGet("assignments/{sessionId}")]
+        public IActionResult GetAssignments(string sessionId)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                _logger.LogInformation($"Returning {session.Assignments?.Count ?? 0} assignments for session {sessionId}");
+                return Ok(session.Assignments ?? new List<PlayerRoleAssignment>());
+            }
             return NotFound();
         }
 

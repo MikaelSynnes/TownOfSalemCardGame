@@ -8,6 +8,8 @@ namespace TownOfSalemCardGame.Shared
         public string SessionId { get; set; } = string.Empty;
         public string ManagerUsername { get; set; } = string.Empty;
         public List<string> Participants { get; set; } = new();
+        public bool IsStarted { get; set; } = false; // Indicates if the session has started
+        public List<PlayerRoleAssignment> Assignments { get; set; } = new(); // Persist assignments
     }
 
     public class SessionRequest
@@ -57,5 +59,12 @@ namespace TownOfSalemCardGame.Shared
     {
         public string SessionId { get; set; } = string.Empty;
         public List<RoleInfo> Roles { get; set; } = new();
+    }
+
+    public class PlayerRoleAssignment
+    {
+        public string? Player { get; set; }
+        public RoleInfo? Role { get; set; }
+        public HashSet<string> States { get; set; } = new();
     }
 }

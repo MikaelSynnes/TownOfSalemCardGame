@@ -134,6 +134,12 @@ else
             {
                 sessionRequest.Username = username;
                 SessionId = sessionId;
+                Session = session;
+                if (Session.ManagerUsername == username && Session.IsStarted)
+                {
+                    NavigationManager.NavigateTo("/session-roles", true);
+                    return;
+                }
                 await StartSignalR();
                 await RefreshSession();
             }
@@ -251,6 +257,10 @@ else
         {
             var cleanSessionId = SessionId.Trim('"');
             Session = await Http.GetFromJsonAsync<Session>($"api/session/{cleanSessionId}");
+            if (Session != null && Session.ManagerUsername == sessionRequest.Username && Session.IsStarted)
+            {
+                NavigationManager.NavigateTo("/session-roles", true);
+            }
         }
     }
 

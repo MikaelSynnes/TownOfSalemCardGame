@@ -2,6 +2,8 @@
 @using TownOfSalemCardGame.Shared
 @using TownOfSalemCardGame.Client.Shared
 @inject SessionState SessionState
+@inject HttpClient Http
+@inject IJSRuntime JS
 
 <h3>Player Roles</h3>
 @if (SessionState.PlayerAssignments == null || SessionState.PlayerAssignments.Count == 0)
@@ -62,8 +64,15 @@ else
         ("Saved", "warning")
     };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "SessionId");
+        if (!string.IsNullOrEmpty(sessionId))
+        {
+            var assignments = await Http.GetFromJsonAsync<List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>>($"api/session/assignments/{sessionId}");
+            // Always set, even if empty
+            SessionState.PlayerAssignments = assignments ?? new List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>();
+        }
         // Set Alive by default for all assignments that have no state
         if (SessionState.PlayerAssignments != null)
         {
@@ -77,7 +86,7 @@ else
         }
     }
 
-    private void ToggleState(PlayerRoleAssignment assignment, string state)
+    private void ToggleState(TownOfSalemCardGame.Shared.PlayerRoleAssignment assignment, string state)
     {
         if (assignment.States == null)
             assignment.States = new HashSet<string>();
@@ -96,19 +105,19 @@ else
         }
         else
         {
-            if (!assignment.States.Add(state))
+            if (assignment.States.Contains(state))
             {
                 assignment.States.Remove(state);
                 changed = true;
             }
             else
             {
+                assignment.States.Add(state);
                 changed = true;
             }
         }
         if (changed)
         {
-            // Force a new reference to trigger UI update
             assignment.States = new HashSet<string>(assignment.States);
             StateHasChanged();
         }
