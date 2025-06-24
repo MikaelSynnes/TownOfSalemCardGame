@@ -11,14 +11,14 @@
         {
             "label": "run-api",
             "type": "shell",
-            "command": "dotnet run --project NewTestApp.Api",
+            "command": "dotnet run --project TownOfSalemCardGame.Api",
             "group": "test",
             "problemMatcher": []
         },
         {
             "label": "run-client",
             "type": "shell",
-            "command": "dotnet run --project NewTestApp.Client",
+            "command": "dotnet run --project TownOfSalemCardGame.Client",
             "group": "test",
             "problemMatcher": []
         }

@@ -1,0 +1,126 @@
+@page "/join-session"
+@using TownOfSalemCardGame.Shared
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h3>Join Session</h3>
+
+@if (!Joined)
+{
+    <EditForm Model="joinRequest" OnValidSubmit="JoinSessionHandler">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label>Session ID:</label>
+            <InputText @bind-Value="joinRequest.SessionId" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>Username:</label>
+            <InputText @bind-Value="joinRequest.Username" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Join Session</button>
+    </EditForm>
+    @if (Error != null)
+    {
+        <div class="alert alert-danger">@Error</div>
+    }
+}
+else
+{
+    <div class="alert alert-success">
+        <strong>Joined Session!</strong><br />
+        Session ID: <span class="fw-bold">@joinRequest.SessionId</span>
+    </div>
+}
+
+@if (Joined && RoleName == null)
+{
+    <div class="alert alert-info mt-4">
+        Waiting for host to start the game...
+    </div>
+}
+@if (Joined && RoleName != null)
+{
+    <div class="alert alert-info mt-4">
+        <strong>Your Role: @RoleName</strong><br />
+        <span>@RoleDescription</span>
+    </div>
+}
+
+@code {
+    private JoinSessionRequest joinRequest = new();
+    private bool Joined = false;
+    private string? Error;
+    private string? UserRole;
+    private string? RoleName;
+    private string? RoleDescription;
+    private HubConnection? hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Try to restore session from cookie
+        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "SessionId");
+        var username = await JS.InvokeAsync<string>("sessionCookie.get", "Username");
+        if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
+        {
+            joinRequest.SessionId = sessionId;
+            joinRequest.Username = username;
+            await JoinSessionHandler();
+        }
+    }
+
+    private async Task JoinSessionHandler()
+    {
+        var response = await Http.PostAsJsonAsync("api/session/join", joinRequest);
+        if (response.IsSuccessStatusCode)
+        {
+            Joined = true;
+            Error = null;
+            await JS.InvokeVoidAsync("sessionCookie.set", "SessionId", joinRequest.SessionId, 7);
+            await JS.InvokeVoidAsync("sessionCookie.set", "Username", joinRequest.Username, 7);
+            await StartSignalR();
+        }
+        else
+        {
+            Error = "Session not found or join failed.";
+        }
+    }
+
+    private string GetSignalRHubUrl()
+    {
+        var baseUri = Http.BaseAddress?.ToString()?.TrimEnd('/') ?? NavigationManager.BaseUri.TrimEnd('/');
+        var hubUrl = baseUri.Replace("http://", NavigationManager.Uri.StartsWith("https://") ? "https://" : "http://");
+        return $"{hubUrl}/sessionHub";
+    }
+
+    private async Task StartSignalR()
+    {
+        var hubUrl = GetSignalRHubUrl();
+        _ = JS.InvokeVoidAsync("console.log", $"Connecting to SignalR hub at: {hubUrl}");
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl)
+            .WithAutomaticReconnect()
+            .Build();
+        hubConnection.On<object>("ReceiveRole", (data) =>
+        {
+            _ = JS.InvokeVoidAsync("console.log", $"SignalR ReceiveRole message received. Raw data: {System.Text.Json.JsonSerializer.Serialize(data)}");
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            if (data is System.Text.Json.JsonElement element && element.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                if (element.TryGetProperty("name", out var nameProp))
+                    RoleName = nameProp.GetString();
+                if (element.TryGetProperty("description", out var descProp))
+                    RoleDescription = descProp.GetString();
+                StateHasChanged();
+            }
+        });
+        await hubConnection.StartAsync();
+        await hubConnection.InvokeAsync("SubscribeToSession", $"{joinRequest.SessionId}_{joinRequest.Username}");
+    }
+
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+}
