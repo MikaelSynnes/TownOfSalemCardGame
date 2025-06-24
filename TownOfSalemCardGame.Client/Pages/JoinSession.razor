@@ -60,11 +60,14 @@ else
     private string? RoleDescription;
     private HubConnection? hubConnection;
 
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
-        // Try to restore session from cookie
-        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "SessionId");
-        var username = await JS.InvokeAsync<string>("sessionCookie.get", "Username");
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var sessionId = query["sessionId"];
+        var username = query["username"];
         if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
         {
             joinRequest.SessionId = sessionId;
@@ -80,8 +83,8 @@ else
         {
             Joined = true;
             Error = null;
-            await JS.InvokeVoidAsync("sessionCookie.set", "SessionId", joinRequest.SessionId, 7);
-            await JS.InvokeVoidAsync("sessionCookie.set", "Username", joinRequest.Username, 7);
+            await JS.InvokeVoidAsync("sessionCookie.set", "PlayerSessionId", joinRequest.SessionId, 7);
+            await JS.InvokeVoidAsync("sessionCookie.set", "PlayerUsername", joinRequest.Username, 7);
             await StartSignalR();
         }
         else
@@ -121,6 +124,4 @@ else
         await hubConnection.StartAsync();
         await hubConnection.InvokeAsync("SubscribeToSession", $"{joinRequest.SessionId}_{joinRequest.Username}");
     }
-
-    [Inject] NavigationManager NavigationManager { get; set; } = default!;
 }

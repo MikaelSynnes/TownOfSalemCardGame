@@ -128,10 +128,23 @@ else
         var username = await JS.InvokeAsync<string>("sessionCookie.get", "Username");
         if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
         {
-            sessionRequest.Username = username;
-            SessionId = sessionId;
-            await StartSignalR();
-            await RefreshSession();
+            // Check if session actually exists on server
+            var session = await Http.GetFromJsonAsync<Session>($"api/session/{sessionId}");
+            if (session != null)
+            {
+                sessionRequest.Username = username;
+                SessionId = sessionId;
+                await StartSignalR();
+                await RefreshSession();
+            }
+            else
+            {
+                // Session not found, erase cookies and show create UI
+                await JS.InvokeVoidAsync("sessionCookie.erase", "SessionId");
+                await JS.InvokeVoidAsync("sessionCookie.erase", "Username");
+                SessionId = null;
+                sessionRequest = new();
+            }
         }
     }
 

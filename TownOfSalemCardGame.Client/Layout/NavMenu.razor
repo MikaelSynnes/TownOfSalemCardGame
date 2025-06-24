@@ -1,36 +1,51 @@
 ﻿@using Microsoft.AspNetCore.Components.Routing
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">TownOfSalemCardGame.Client</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
     </div>
 </div>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+<div class="nav-scrollable">
     <nav class="nav flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="create-session" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="/create-session" Match="NavLinkMatch.All">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create Session
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="join-session">
+            <NavLink class="nav-link" href="/join-session">
                 <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> Join Session
             </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <button class="btn btn-outline-light w-100" @onclick="JoinExistingGameFromCookie">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Join Existing Game
+            </button>
+            @if (!string.IsNullOrEmpty(joinError))
+            {
+                <div class="text-danger mt-2">@joinError</div>
+            }
         </div>
     </nav>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    private string joinError;
+    private async Task JoinExistingGameFromCookie()
     {
-        collapseNavMenu = !collapseNavMenu;
+        joinError = null;
+        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "PlayerSessionId");
+        var username = await JS.InvokeAsync<string>("sessionCookie.get", "PlayerUsername");
+        if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
+        {
+            Navigation.NavigateTo($"/join-session?sessionId={sessionId}&username={username}", forceLoad: true);
+        }
+        else
+        {
+            joinError = "No existing game session found in your browser.";
+        }
     }
 }
