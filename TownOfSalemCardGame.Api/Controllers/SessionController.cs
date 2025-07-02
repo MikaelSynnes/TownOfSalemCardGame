@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using TownOfSalemCardGame.Shared;
 using TownOfSalemCardGame.Api.Hubs;
 using System.Collections.Concurrent;
@@ -15,7 +14,8 @@ namespace TownOfSalemCardGame.Api.Controllers
         private readonly IHubContext<SessionHub> _hubContext;
         private readonly ILogger<SessionController> _logger;
 
-        public SessionController(ConcurrentDictionary<string, Session> sessions, IHubContext<SessionHub> hubContext, ILogger<SessionController> logger)
+        public SessionController(ConcurrentDictionary<string, Session> sessions, IHubContext<SessionHub> hubContext,
+            ILogger<SessionController> logger)
         {
             _sessions = sessions;
             _hubContext = hubContext;
@@ -54,10 +54,12 @@ namespace TownOfSalemCardGame.Api.Controllers
                 {
                     roles.AddRange(Enumerable.Repeat(role, role.Count));
                 }
+
                 if (roles.Count != allPlayers.Count)
                 {
                     return BadRequest($"Role count ({roles.Count}) does not match player count ({allPlayers.Count})");
                 }
+
                 var rng = new Random();
                 roles = roles.OrderBy(_ => rng.Next()).ToList();
                 var assignments = new List<object>();
@@ -66,14 +68,17 @@ namespace TownOfSalemCardGame.Api.Controllers
                     string player = allPlayers[i];
                     var role = roles[i];
                     string group = $"{req.SessionId}_{player}";
-                    await _hubContext.Clients.Group(group).SendAsync("ReceiveRole", new { role.Name, role.Description });
+                    await _hubContext.Clients.Group(group)
+                        .SendAsync("ReceiveRole", new { role.Name, role.Description });
                     assignments.Add(new { Player = player, Role = new { role.Name, role.Description } });
                     _logger.LogInformation($"Assigned role {role.Name} to {player} in session {req.SessionId}");
                 }
+
                 // Send all assignments to the manager only
                 await _hubContext.Clients.Group(req.SessionId).SendAsync("ReceiveAllRoles", assignments);
                 return Ok();
             }
+
             return NotFound();
         }
 
@@ -86,11 +91,14 @@ namespace TownOfSalemCardGame.Api.Controllers
                 if (!session.Participants.Contains(req.Username) && role != "manager")
                 {
                     session.Participants.Add(req.Username);
-                    _logger.LogInformation($"Sending SignalR UserJoined for session {req.SessionId}, user {req.Username}");
+                    _logger.LogInformation(
+                        $"Sending SignalR UserJoined for session {req.SessionId}, user {req.Username}");
                     await _hubContext.Clients.Group(req.SessionId).SendAsync("UserJoined", session);
                 }
+
                 return Ok(session);
             }
+
             return NotFound();
         }
 

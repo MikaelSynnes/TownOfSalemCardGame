@@ -1,9 +1,9 @@
 # NewTestApp
 
 This is a fullstack application built with .NET 9.0, featuring:
-- **Backend:** ASP.NET Core Web API (`NewTestApp.Api`)
-- **Frontend:** Blazor WebAssembly (`NewTestApp.Client`)
-- **Shared Library:** For models and DTOs (`NewTestApp.Shared`)
+- **Backend:** ASP.NET Core Web API (`TownOfSalemCardGame.Api`)
+- **Frontend:** Blazor WebAssembly (`TownOfSalemCardGame.Client`)
+- **Shared Library:** For models and DTOs (`TownOfSalemCardGame.Shared`)
 
 ## Features
 - Users can create or join a session with a username.
@@ -22,17 +22,17 @@ This is a fullstack application built with .NET 9.0, featuring:
    ```
 2. Run the backend API:
    ```powershell
-   dotnet run --project NewTestApp.Api
+   dotnet run --project TownOfSalemCardGame.Api
    ```
 3. Run the Blazor frontend:
    ```powershell
-   dotnet run --project NewTestApp.Client
+   dotnet run --project TownOfSalemCardGame.Client
    ```
 
 ## Project Structure
-- `NewTestApp.Api` - ASP.NET Core Web API backend
-- `NewTestApp.Client` - Blazor WebAssembly frontend
-- `NewTestApp.Shared` - Shared models and DTOs
+- `TownOfSalemCardGame.Api` - ASP.NET Core Web API backend
+- `TownOfSalemCardGame.Client` - Blazor WebAssembly frontend
+- `TownOfSalemCardGame.Shared` - Shared models and DTOs
 
 ---
 
