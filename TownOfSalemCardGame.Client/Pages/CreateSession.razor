@@ -115,7 +115,12 @@ else
     {
         new RoleInfo { Name = "Mafia", Description = "A member of the mafia. Eliminate citizens and avoid detection.", Count = 0 },
         new RoleInfo { Name = "Citizen", Description = "An innocent citizen. Find and vote out the mafia.", Count = 0 },
-        new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine their role.", Count = 0 }
+        new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine their role.", Count = 0 },
+        new RoleInfo { Name = "Serial Killer", Description = "A lone killer who eliminates one player each night. Wins alone.", Count = 0 },
+        new RoleInfo { Name = "Witch", Description = "Can control a player each night, forcing them to target another.", Count = 0 },
+        new RoleInfo { Name = "Hateful Citizen", Description = "A citizen who wins if lynched by the town.", Count = 0 },
+        new RoleInfo { Name = "Peaceful Citizen", Description = "A citizen who cannot vote to lynch and wins with the town.", Count = 0 },
+        new RoleInfo { Name = "Medic", Description = "Can protect one player from death each night.", Count = 0 }
     };
 
     // Holds player-role assignments for the manager

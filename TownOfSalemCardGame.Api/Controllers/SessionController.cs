@@ -72,7 +72,10 @@ namespace TownOfSalemCardGame.Api.Controllers
 
                     await _hubContext.Clients.Group(group)
                         .SendAsync("ReceiveRole", new { role.Name, role.Description });
-                    assignments.Add(new { Player = player, Role = new { role.Name, role.Description } });
+                    assignments.Add(new PlayerRoleAssignment {
+                        Player = player,
+                        Role = new RoleInfo { Name = role.Name, Description = role.Description }
+                    });
                     _logger.LogInformation($"Assigned role {role.Name} to {player} in session {req.SessionId}");
                 }
 
