@@ -59,32 +59,43 @@ else
     private string? RoleName;
     private string? RoleDescription;
     private HubConnection? hubConnection;
+    private bool IsManager = false;
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        var sessionId = query["sessionId"];
-        var username = query["username"];
-        if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
-        {
-            joinRequest.SessionId = sessionId;
-            joinRequest.Username = username;
-            await JoinSessionHandler();
-        }
-    }
-
     private async Task JoinSessionHandler()
     {
+        // Try rejoin as manager first
+        var rejoinResponse = await Http.PostAsJsonAsync("api/session/rejoin", joinRequest);
+        if (rejoinResponse.IsSuccessStatusCode)
+        {
+            var session = await rejoinResponse.Content.ReadFromJsonAsync<Session>();
+            if (session != null && session.ManagerUsername == joinRequest.Username)
+            {
+                IsManager = true;
+                Joined = true;
+                Error = null;
+                await StartSignalR();
+                // Navigate based on game state
+                if (session.IsStarted)
+                {
+                    // Pass sessionId as query parameter to session-roles
+                    NavigationManager.NavigateTo($"/session-roles?sessionId={session.SessionId}", true);
+                }
+                else
+                {
+                    // Pass sessionId as query parameter to create-session
+                    NavigationManager.NavigateTo($"/create-session?sessionId={session.SessionId}", true);
+                }
+                return;
+            }
+        }
+        // Fallback to normal join for participants
         var response = await Http.PostAsJsonAsync("api/session/join", joinRequest);
         if (response.IsSuccessStatusCode)
         {
             Joined = true;
             Error = null;
-            await JS.InvokeVoidAsync("sessionCookie.set", "PlayerSessionId", joinRequest.SessionId, 7);
-            await JS.InvokeVoidAsync("sessionCookie.set", "PlayerUsername", joinRequest.Username, 7);
             await StartSignalR();
         }
         else

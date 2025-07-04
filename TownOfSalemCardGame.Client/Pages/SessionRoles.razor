@@ -56,6 +56,7 @@ else
 }
 
 @code {
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
     private static readonly (string State, string Color)[] StateOptions = new[] {
         ("Alive", "success"),
         ("Dead", "danger"),
@@ -66,12 +67,30 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "SessionId");
+        // Restore sessionId from query string if present
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var sessionId = query["sessionId"];
         if (!string.IsNullOrEmpty(sessionId))
         {
             var assignments = await Http.GetFromJsonAsync<List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>>($"api/session/assignments/{sessionId}");
-            // Always set, even if empty
-            SessionState.PlayerAssignments = assignments ?? new List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>();
+            if (assignments != null && assignments.Count > 0)
+            {
+                SessionState.PlayerAssignments = assignments;
+            }
+            else
+            {
+                // Try to force refresh from the server in case assignments are not yet set
+                var session = await Http.GetFromJsonAsync<Session>($"api/session/{sessionId}");
+                if (session != null && session.Assignments != null && session.Assignments.Count > 0)
+                {
+                    SessionState.PlayerAssignments = session.Assignments;
+                }
+                else
+                {
+                    SessionState.PlayerAssignments = new List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>();
+                }
+            }
         }
         // Set Alive by default for all assignments that have no state
         if (SessionState.PlayerAssignments != null)

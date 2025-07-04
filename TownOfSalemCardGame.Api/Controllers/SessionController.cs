@@ -79,8 +79,10 @@ namespace TownOfSalemCardGame.Api.Controllers
                     _logger.LogInformation($"Assigned role {role.Name} to {player} in session {req.SessionId}");
                 }
 
-                // Send all assignments to the manager only
+                // Store assignments in session for restoration
+                session.Assignments = assignments;
 
+                // Send all assignments to the manager only
                 await _hubContext.Clients.Group(req.SessionId).SendAsync("ReceiveAllRoles", assignments);
                 return Ok();
             }
@@ -105,6 +107,21 @@ namespace TownOfSalemCardGame.Api.Controllers
                 return Ok(session);
             }
 
+            return NotFound();
+        }
+
+        [HttpPost("rejoin")]
+        public IActionResult RejoinSession([FromBody] JoinSessionRequest req)
+        {
+            if (_sessions.TryGetValue(req.SessionId, out var session))
+            {
+                // Allow rejoin if username is manager or already in participants
+                if (session.ManagerUsername == req.Username || session.Participants.Contains(req.Username))
+                {
+                    return Ok(session);
+                }
+                return BadRequest("User not found in session");
+            }
             return NotFound();
         }
 

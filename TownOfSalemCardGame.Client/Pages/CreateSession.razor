@@ -126,39 +126,6 @@ else
     // Holds player-role assignments for the manager
     private List<PlayerRoleAssignment>? PlayerAssignments;
 
-    protected override async Task OnInitializedAsync()
-    {
-        // Try to restore session from cookie
-        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "SessionId");
-        var username = await JS.InvokeAsync<string>("sessionCookie.get", "Username");
-        if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
-        {
-            // Check if session actually exists on server
-            var session = await Http.GetFromJsonAsync<Session>($"api/session/{sessionId}");
-            if (session != null)
-            {
-                sessionRequest.Username = username;
-                SessionId = sessionId;
-                Session = session;
-                if (Session.ManagerUsername == username && Session.IsStarted)
-                {
-                    NavigationManager.NavigateTo("/session-roles", true);
-                    return;
-                }
-                await StartSignalR();
-                await RefreshSession();
-            }
-            else
-            {
-                // Session not found, erase cookies and show create UI
-                await JS.InvokeVoidAsync("sessionCookie.erase", "SessionId");
-                await JS.InvokeVoidAsync("sessionCookie.erase", "Username");
-                SessionId = null;
-                sessionRequest = new();
-            }
-        }
-    }
-
     private async Task CreateSessionHandler()
     {
         var response = await Http.PostAsJsonAsync("api/session/create", sessionRequest);
@@ -166,8 +133,6 @@ else
         {
             var rawSessionId = await response.Content.ReadAsStringAsync();
             SessionId = rawSessionId.Trim('"');
-            await JS.InvokeVoidAsync("sessionCookie.set", "SessionId", SessionId, 7);
-            await JS.InvokeVoidAsync("sessionCookie.set", "Username", sessionRequest.Username, 7);
             await StartSignalR();
             await RefreshSession();
         }
@@ -255,6 +220,28 @@ else
     }
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Restore sessionId and username from query string if present
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var sessionId = query["sessionId"];
+        var username = query["username"];
+        if (!string.IsNullOrEmpty(sessionId))
+        {
+            SessionId = sessionId;
+            // Try to get session from server
+            Session = await Http.GetFromJsonAsync<Session>($"api/session/{SessionId}");
+            if (Session != null)
+            {
+                // Use username from query if present, else fallback to manager
+                sessionRequest.Username = !string.IsNullOrEmpty(username) ? username : Session.ManagerUsername;
+                await StartSignalR();
+                await RefreshSession();
+            }
+        }
+    }
 
     private async Task RefreshSession()
     {
