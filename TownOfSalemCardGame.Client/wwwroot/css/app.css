@@ -362,6 +362,201 @@ code {
 }
 
 /* ========================================================
+   Trading-Card Style Role Cards
+   ======================================================== */
+
+/*
+ * tc-card  — the outer card shell, styled like a physical trading card.
+ * Width is fixed so cards look like real cards (portrait 2.5:3.5 ratio).
+ */
+.tc-card {
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    min-height: 340px;
+    border-radius: 10px;
+    border: 2px solid var(--tos-border-glow);
+    background: linear-gradient(175deg, var(--tos-surface-2) 0%, var(--tos-surface) 100%);
+    box-shadow: var(--tos-shadow), inset 0 0 40px rgba(0,0,0,0.4);
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    font-family: 'Crimson Text', Georgia, serif;
+}
+
+.tc-card:hover {
+    transform: translateY(-4px) rotate(-0.5deg);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.85), 0 0 18px rgba(201,168,76,0.35);
+}
+
+/* Faction border colours */
+.tc-card.faction-town    { border-color: var(--tos-town-light);    box-shadow: var(--tos-shadow), 0 0 10px rgba(76,175,80,0.25); }
+.tc-card.faction-mafia   { border-color: var(--tos-mafia-light);   box-shadow: var(--tos-shadow), 0 0 10px rgba(57,73,171,0.35); }
+.tc-card.faction-coven   { border-color: var(--tos-coven-light);   box-shadow: var(--tos-shadow), 0 0 10px rgba(156,39,176,0.35); }
+.tc-card.faction-neutral { border-color: var(--tos-neutral-light); box-shadow: var(--tos-shadow), 0 0 10px rgba(192,176,76,0.2);  }
+
+.tc-card.state-dead {
+    opacity: 0.5;
+    filter: grayscale(70%) brightness(0.7);
+}
+
+/* ── Top player-name / faction bar ── */
+.tc-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 9px 4px;
+    background: rgba(0,0,0,0.45);
+    border-bottom: 1px solid var(--tos-border);
+}
+
+.tc-player-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--tos-text-heading);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.tc-faction-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+.faction-town    .tc-faction-badge { background: var(--tos-town);    color: #a0f0a0; }
+.faction-mafia   .tc-faction-badge { background: var(--tos-mafia);   color: #a0a8f0; }
+.faction-coven   .tc-faction-badge { background: var(--tos-coven);   color: #e0a0f5; }
+.faction-neutral .tc-faction-badge { background: var(--tos-neutral); color: var(--tos-neutral-light); }
+
+/* ── Role title banner ── */
+.tc-title-banner {
+    padding: 5px 8px 4px;
+    text-align: center;
+    background: rgba(0,0,0,0.30);
+    border-bottom: 1px solid var(--tos-border);
+}
+
+.tc-role-name {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 10px rgba(201,168,76,0.45);
+}
+
+/* ── Art panel ── */
+.tc-art-panel {
+    width: 100%;
+    height: 140px;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #0e0c0a;
+    position: relative;
+}
+
+.tc-art-panel svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ── Divider ── */
+.tc-divider {
+    height: 3px;
+    flex-shrink: 0;
+}
+.faction-town    .tc-divider { background: linear-gradient(90deg, transparent, var(--tos-town-light), transparent); }
+.faction-mafia   .tc-divider { background: linear-gradient(90deg, transparent, var(--tos-mafia-light), transparent); }
+.faction-coven   .tc-divider { background: linear-gradient(90deg, transparent, var(--tos-coven-light), transparent); }
+.faction-neutral .tc-divider { background: linear-gradient(90deg, transparent, var(--tos-neutral-light), transparent); }
+
+/* ── Description text box ── */
+.tc-desc-box {
+    flex: 1 1 auto;
+    padding: 7px 10px 5px;
+    background: rgba(0,0,0,0.20);
+}
+
+.tc-desc {
+    margin: 0;
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--tos-text);
+    line-height: 1.45;
+}
+
+/* ── States bar ── */
+.tc-states-bar {
+    padding: 4px 8px 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    border-top: 1px solid var(--tos-border);
+    background: rgba(0,0,0,0.18);
+}
+
+/* ── Action buttons footer ── */
+.tc-actions {
+    padding: 5px 8px 8px;
+    border-top: 1px solid var(--tos-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    background: rgba(0,0,0,0.35);
+}
+
+/* ── Grid that holds tc-cards ── */
+.tc-cards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.4rem;
+    padding: 0.5rem 0;
+    justify-content: flex-start;
+}
+
+/* ── Single large reveal card (non-manager view) ── */
+.tc-reveal-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    padding: 2rem 1rem;
+}
+
+.tc-reveal-wrap .tc-card {
+    width: min(260px, 92vw);
+    min-height: 400px;
+}
+
+.tc-reveal-wrap .tc-art-panel {
+    height: 175px;
+}
+
+.tc-reveal-wrap .tc-role-name {
+    font-size: 1.1rem;
+}
+
+/* ── Responsive: on very small screens stack full-width ── */
+@media (max-width: 400px) {
+    .tc-card {
+        width: 100%;
+        min-height: unset;
+    }
+    .tc-cards-grid {
+        justify-content: center;
+    }
+}
+
+/* ========================================================
    Role Cards — Player Assignment Grid
    ======================================================== */
 

@@ -1,6 +1,7 @@
 @page "/session-roles"
 @using TownOfSalemCardGame.Shared
 @using TownOfSalemCardGame.Client.Shared
+@using TownOfSalemCardGame.Client.Components
 @inject SessionState SessionState
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -13,44 +14,29 @@
 }
 else if (SessionState.IsManager)
 {
-    <div class="role-cards-grid">
+    <div class="tc-cards-grid">
         @foreach (var assignment in SessionState.PlayerAssignments)
         {
             var faction = GetFaction(assignment.Role?.Name);
             var isDead = assignment.States != null && assignment.States.Contains("Dead");
-            <div class="role-card faction-@faction @(isDead ? "state-dead" : "")">
-                <div class="role-card-header">
-                    <span class="role-card-player">@assignment.Player</span>
-                    <span class="role-card-faction-badge">@faction</span>
-                </div>
-                <div class="role-card-body">
-                    <div class="role-card-name">@(assignment.Role?.Name ?? "Unknown")</div>
-                    <div class="role-card-desc">@assignment.Role?.Description</div>
-                    <div class="role-card-states">
-                        @if (assignment.States != null && assignment.States.Count > 0)
-                        {
-                            @foreach (var state in assignment.States)
-                            {
-                                var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                                <span class="badge bg-@color">@state</span>
-                            }
-                        }
-                        else
-                        {
-                            <span style="color:var(--tos-text-muted);font-size:0.8rem;">No states</span>
-                        }
-                    </div>
-                </div>
-                <div class="role-card-actions">
+            var a = assignment;
+            <RoleCard PlayerName="@a.Player"
+                      RoleName="@(a.Role?.Name ?? "Unknown")"
+                      Description="@a.Role?.Description"
+                      Faction="@faction"
+                      IsDead="@isDead"
+                      States="@a.States">
+                <ActionContent>
                     @foreach (var (state, color) in StateOptions)
                     {
-                        <button class="btn btn-sm @(assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)"
-                                @onclick="() => ToggleState(assignment, state)">
-                            @state
+                        var s = state; var c = color;
+                        <button class="btn btn-sm @(a.States.Contains(s) ? $"btn-{c}" : "btn-outline-" + c)"
+                                @onclick="() => ToggleState(a, s)">
+                            @s
                         </button>
                     }
-                </div>
-            </div>
+                </ActionContent>
+            </RoleCard>
         }
     </div>
 }
@@ -64,28 +50,13 @@ else
     else
     {
         var faction = GetFaction(myAssignment.Role?.Name);
-        var roleIcon = GetRoleIcon(myAssignment.Role?.Name);
-        <div class="role-reveal-wrap">
-            <div class="role-reveal-card faction-@faction">
-                <div class="role-reveal-top">
-                    <div class="role-reveal-label">Your Role Has Been Revealed</div>
-                    <div class="role-reveal-icon">@roleIcon</div>
-                    <div class="role-reveal-name">@myAssignment.Role?.Name</div>
-                    <span class="role-reveal-faction faction-@faction">@faction</span>
-                </div>
-                <hr class="role-reveal-divider" />
-                <div class="role-reveal-desc">@myAssignment.Role?.Description</div>
-                @if (myAssignment.States != null && myAssignment.States.Count > 0)
-                {
-                    <div class="role-reveal-states">
-                        @foreach (var state in myAssignment.States)
-                        {
-                            var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                            <span class="badge bg-@color">@state</span>
-                        }
-                    </div>
-                }
-            </div>
+        <div class="tc-reveal-wrap">
+            <RoleCard PlayerName="@myAssignment.Player"
+                      RoleName="@(myAssignment.Role?.Name ?? "Unknown")"
+                      Description="@myAssignment.Role?.Description"
+                      Faction="@faction"
+                      IsDead="@(myAssignment.States != null && myAssignment.States.Contains("Dead"))"
+                      States="@myAssignment.States" />
         </div>
     }
 }

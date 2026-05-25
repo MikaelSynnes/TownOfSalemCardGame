@@ -1,0 +1,79 @@
+@using TownOfSalemCardGame.Shared
+@using Microsoft.AspNetCore.Components
+
+<div class="tc-card faction-@Faction @(IsDead ? "state-dead" : "") @CssClass">
+    @* ── top ornament bar ── *@
+    <div class="tc-top-bar">
+        <span class="tc-player-name">@PlayerName</span>
+        <span class="tc-faction-badge">@Faction</span>
+    </div>
+
+    @* ── role title banner ── *@
+    <div class="tc-title-banner">
+        <span class="tc-role-name">@RoleName</span>
+    </div>
+
+    @* ── artwork panel ── *@
+    <div class="tc-art-panel">
+        @((MarkupString)RoleCardArt.Get(RoleName))
+    </div>
+
+    @* ── divider line with faction colour ── *@
+    <div class="tc-divider"></div>
+
+    @* ── description text box ── *@
+    <div class="tc-desc-box">
+        <p class="tc-desc">@Description</p>
+    </div>
+
+    @* ── states bar ── *@
+    @if (States != null && States.Count > 0)
+    {
+        <div class="tc-states-bar">
+            @foreach (var state in States)
+            {
+                var color = StateColor(state);
+                <span class="badge bg-@color">@state</span>
+            }
+            @if (HasNecronomicon)
+            {
+                <span class="badge bg-dark" title="Holds the Necronomicon">📖 Necronomicon</span>
+            }
+        </div>
+    }
+
+    @* ── action buttons footer ── *@
+    @if (ActionContent != null)
+    {
+        <div class="tc-actions">
+            @ActionContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? PlayerName { get; set; }
+    [Parameter] public string? RoleName { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string Faction { get; set; } = "neutral";
+    [Parameter] public bool IsDead { get; set; }
+    [Parameter] public bool HasNecronomicon { get; set; }
+    [Parameter] public HashSet<string>? States { get; set; }
+    [Parameter] public RenderFragment? ActionContent { get; set; }
+    [Parameter] public string CssClass { get; set; } = "";
+
+    private static string StateColor(string state) => state switch
+    {
+        "Alive"     => "success",
+        "Dead"      => "danger",
+        "Muted"     => "secondary",
+        "Protected" => "info",
+        "Saved"     => "warning",
+        "Doused"    => "warning",
+        "Hexed"     => "purple",
+        "Poisoned"  => "dark",
+        "Jailed"    => "primary",
+        "Cleaned"   => "light",
+        _           => "secondary"
+    };
+}

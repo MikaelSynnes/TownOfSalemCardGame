@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Components
 @using System.Text.Json
 @using TownOfSalemCardGame.Client.Shared
+@using TownOfSalemCardGame.Client.Components
 @inject SessionState SessionState
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -77,12 +78,11 @@ else
 }
 @if (Joined && RoleName != null)
 {
-    <div class="card border-info mt-4 shadow-sm">
-        <div class="card-header bg-info text-white fw-bold">Your Role</div>
-        <div class="card-body">
-            <h4 class="card-title">@RoleName</h4>
-            <p class="card-text">@RoleDescription</p>
-        </div>
+    <div class="tc-reveal-wrap">
+        <RoleCard PlayerName="@joinRequest.Username"
+                  RoleName="@RoleName"
+                  Description="@RoleDescription"
+                  Faction="@GetFaction(RoleName)" />
     </div>
 }
 
@@ -100,6 +100,33 @@ else
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
     private record PreviousSession(string SessionId, string Username, string SavedAt);
+
+    private static readonly HashSet<string> TownRoleNames = new()
+    {
+        "Citizen", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
+        "Vigilante", "Veteran", "Medium", "Retributionist", "Transporter", "Jailor",
+        "Tracker", "Lookout", "Spy", "Crusader", "Psychic", "Trap Master", "Coroner"
+    };
+
+    private static readonly HashSet<string> MafiaRoleNames = new()
+    {
+        "Mafia", "Godfather", "Consigliere", "Blackmailer", "Consort", "Framer",
+        "Disguiser", "Forger", "Janitor", "Hypnotist", "Ambusher"
+    };
+
+    private static readonly HashSet<string> CovenRoleNames = new()
+    {
+        "Coven Leader", "Medusa", "Necromancer", "Hex Master", "Potion Master", "Poisoner"
+    };
+
+    private static string GetFaction(string? roleName)
+    {
+        if (roleName == null) return "neutral";
+        if (TownRoleNames.Contains(roleName)) return "town";
+        if (MafiaRoleNames.Contains(roleName)) return "mafia";
+        if (CovenRoleNames.Contains(roleName)) return "coven";
+        return "neutral";
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

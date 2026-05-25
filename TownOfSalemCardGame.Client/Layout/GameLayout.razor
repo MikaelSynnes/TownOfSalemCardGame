@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<div class="game-layout">
+    <header class="game-header">
+        <button class="back-btn" @onclick="GoBack" title="Back to home">
+            ← Back
+        </button>
+        <span class="game-header-title">⚖️ Town of Salem</span>
+    </header>
+    <main class="game-content">
+        @Body
+    </main>
+</div>
+
+@code {
+    private void GoBack() => NavigationManager.NavigateTo("/");
+}

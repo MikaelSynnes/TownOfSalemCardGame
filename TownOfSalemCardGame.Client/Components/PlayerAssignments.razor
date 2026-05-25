@@ -2,56 +2,38 @@
 
 <div class="tos-panel mt-4">
     <div class="tos-panel-title">⚖️ Player Roles</div>
-    <div class="role-cards-grid">
+    <div class="tc-cards-grid">
         @foreach (var assignment in Assignments)
         {
             var faction = GetFaction(assignment.Role?.Name);
             var isDead = assignment.States != null && assignment.States.Contains("Dead");
-            <div class="role-card faction-@faction @(isDead ? "state-dead" : "")">
-                <div class="role-card-header">
-                    <span class="role-card-player">@assignment.Player</span>
-                    <span class="role-card-faction-badge">@faction</span>
-                </div>
-                <div class="role-card-body">
-                    <div class="role-card-name">@(assignment.Role?.Name ?? "Unknown")</div>
-                    <div class="role-card-desc">@assignment.Role?.Description</div>
-                    <div class="role-card-states">
-                        @if (assignment.States != null && assignment.States.Count > 0)
-                        {
-                            @foreach (var state in assignment.States)
-                            {
-                                var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                                <span class="badge bg-@color">@state</span>
-                            }
-                        }
-                        else
-                        {
-                            <span style="color:var(--tos-text-muted);font-size:0.8rem;">No states</span>
-                        }
-                        @if (assignment.HasNecronomicon)
-                        {
-                            <span class="badge bg-dark" title="Holds the Necronomicon">📖 Necronomicon</span>
-                        }
-                    </div>
-                </div>
-                <div class="role-card-actions">
+            var a = assignment;
+            <RoleCard PlayerName="@a.Player"
+                      RoleName="@(a.Role?.Name ?? "Unknown")"
+                      Description="@a.Role?.Description"
+                      Faction="@faction"
+                      IsDead="@isDead"
+                      HasNecronomicon="@a.HasNecronomicon"
+                      States="@a.States">
+                <ActionContent>
                     @foreach (var (state, color) in StateOptions)
                     {
-                        <button class="btn btn-sm @(assignment.States != null && assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)"
-                                @onclick="() => OnToggleState.InvokeAsync((assignment, state))">
-                            @state
+                        var s = state; var c = color;
+                        <button class="btn btn-sm @(a.States != null && a.States.Contains(s) ? $"btn-{c}" : "btn-outline-" + c)"
+                                @onclick="() => OnToggleState.InvokeAsync((a, s))">
+                            @s
                         </button>
                     }
-                    @if (IsCovenRole(assignment.Role?.Name))
+                    @if (IsCovenRole(a.Role?.Name))
                     {
-                        <button class="btn btn-sm @(assignment.HasNecronomicon ? "btn-dark" : "btn-outline-dark")"
-                                @onclick="() => OnToggleNecronomicon.InvokeAsync(assignment)"
+                        <button class="btn btn-sm @(a.HasNecronomicon ? "btn-dark" : "btn-outline-dark")"
+                                @onclick="() => OnToggleNecronomicon.InvokeAsync(a)"
                                 title="Give or take the Necronomicon">
                             📖 Necronomicon
                         </button>
                     }
-                </div>
-            </div>
+                </ActionContent>
+            </RoleCard>
         }
     </div>
 </div>
