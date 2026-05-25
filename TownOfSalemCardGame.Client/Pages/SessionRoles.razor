@@ -118,6 +118,7 @@ else
     {
         var faction = GetFaction(myAssignment.Role?.Name);
         var visibleStates = GetVisibleStatesForPlayer(myAssignment.States);
+        var activeStates = visibleStates?.Where(s => s != "Dead").ToList();
         <div class="tc-reveal-wrap">
             <RoleCard PlayerName="@myAssignment.Player"
                       RoleName="@(myAssignment.Role?.Name ?? "Unknown")"
@@ -126,12 +127,18 @@ else
                       IsDead="@(myAssignment.States != null && myAssignment.States.Contains("Dead"))"
                       States="@visibleStates" />
         </div>
-        @if (visibleStates != null && visibleStates.Count > 0)
+        @if (myAssignment.States != null && myAssignment.States.Contains("Dead"))
+        {
+            <div class="tc-player-dead-banner mt-3">
+                💀 <strong>You are dead.</strong> You may no longer participate in the game.
+            </div>
+        }
+        @if (activeStates != null && activeStates.Count > 0)
         {
             <div class="tc-player-status-panel mt-3">
                 <h6 class="tc-night-order-title">⚠️ Your Status</h6>
                 <ul class="list-unstyled mb-0">
-                    @foreach (var state in visibleStates)
+                    @foreach (var state in activeStates)
                     {
                         var msg = GetPlayerStateMessage(state);
                         if (msg != null)
@@ -322,6 +329,12 @@ else
         // Fall back to SessionState if the query string was not passed
         if (string.IsNullOrEmpty(_sessionId))
             _sessionId = SessionState.SessionId;
+
+        // Restore username from query string if SessionState was lost (e.g. page refresh)
+        var usernameFromQuery = query["username"];
+        if (!string.IsNullOrEmpty(usernameFromQuery) && string.IsNullOrEmpty(SessionState.Username))
+            SessionState.Username = usernameFromQuery;
+
         if (!string.IsNullOrEmpty(_sessionId))
         {
             var assignments = await Http.GetFromJsonAsync<List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>>($"api/session/assignments/{_sessionId}");
@@ -373,20 +386,61 @@ else
             .Build();
         hubConnection.On<string, string?>("AdminMessage", (message, target) =>
         {
-            receivedMessages.Add(message);
-            StateHasChanged();
+            InvokeAsync(() =>
+            {
+                receivedMessages.Add(message);
+                StateHasChanged();
+            });
+        });
+        hubConnection.On<IEnumerable<string>>("StateUpdated", (states) =>
+        {
+            InvokeAsync(() =>
+            {
+                if (SessionState.PlayerAssignments != null)
+                {
+                    // Match by Username, falling back to the single non-manager assignment
+                    var myAssignment = SessionState.PlayerAssignments
+                        .FirstOrDefault(a => a.Player == SessionState.Username)
+                        ?? (SessionState.PlayerAssignments.Count == 1 ? SessionState.PlayerAssignments[0] : null);
+                    if (myAssignment != null)
+                    {
+                        myAssignment.States = new HashSet<string>(states);
+                        StateHasChanged();
+                    }
+                }
+            });
+        });
+        hubConnection.On<IEnumerable<string>>("NightStatesReset", (clearedStates) =>
+        {
+            InvokeAsync(() =>
+            {
+                if (SessionState.PlayerAssignments != null)
+                {
+                    var cleared = new HashSet<string>(clearedStates);
+                    var myAssignment = SessionState.PlayerAssignments
+                        .FirstOrDefault(a => a.Player == SessionState.Username)
+                        ?? (SessionState.PlayerAssignments.Count == 1 ? SessionState.PlayerAssignments[0] : null);
+                    if (myAssignment?.States != null)
+                    {
+                        myAssignment.States = new HashSet<string>(myAssignment.States.Except(cleared));
+                        StateHasChanged();
+                    }
+                }
+            });
         });
         await hubConnection.StartAsync();
         if (SessionState.IsManager)
         {
-            // Manager subscribes to session-wide group (to receive role-assign confirmations if needed)
+            // Manager subscribes to session-wide group
             await hubConnection.InvokeAsync("SubscribeToSession", sessionId);
         }
         else
         {
-            // Player subscribes to their personal group to receive admin messages
+            // Player subscribes to their personal group (for targeted state updates)
             var username = SessionState.Username ?? string.Empty;
             await hubConnection.InvokeAsync("SubscribeToSession", $"{sessionId}_{username}");
+            // Also subscribe to the session-wide group (for broadcasts like NightStatesReset)
+            await hubConnection.InvokeAsync("SubscribeToSessionGroup", sessionId);
         }
     }
 
@@ -550,7 +604,7 @@ else
         _               => null
     };
 
-    private void ResetNightStates()
+    private async Task ResetNightStates()
     {
         if (SessionState.PlayerAssignments == null) return;
         foreach (var assignment in SessionState.PlayerAssignments)
@@ -559,9 +613,13 @@ else
             assignment.States = new HashSet<string>(assignment.States.Except(OneNightStates));
         }
         StateHasChanged();
+        if (!string.IsNullOrEmpty(_sessionId) && hubConnection?.State == HubConnectionState.Connected)
+        {
+            await hubConnection.InvokeAsync("BroadcastResetNightStates", _sessionId, OneNightStates.ToArray());
+        }
     }
 
-    private void ToggleState(TownOfSalemCardGame.Shared.PlayerRoleAssignment assignment, string state)
+    private async Task ToggleState(TownOfSalemCardGame.Shared.PlayerRoleAssignment assignment, string state)
     {
         if (assignment.States == null)
             assignment.States = new HashSet<string>();
@@ -595,6 +653,11 @@ else
         {
             assignment.States = new HashSet<string>(assignment.States);
             StateHasChanged();
+            if (!string.IsNullOrEmpty(_sessionId) && !string.IsNullOrEmpty(assignment.Player)
+                && hubConnection?.State == HubConnectionState.Connected)
+            {
+                await hubConnection.InvokeAsync("BroadcastStateUpdate", _sessionId, assignment.Player, assignment.States.ToArray());
+            }
         }
     }
 }

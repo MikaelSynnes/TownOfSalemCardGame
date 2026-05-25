@@ -54,8 +54,34 @@
             <RoleCard PlayerName="@joinRequest.Username"
                       RoleName="@RoleName"
                       Description="@RoleDescription"
-                      Faction="@GetFaction(RoleName)" />
+                      Faction="@GetFaction(RoleName)"
+                      IsDead="@(playerStates.Contains("Dead"))"
+                      States="@GetVisiblePlayerStates()" />
         </div>
+        @if (playerStates.Contains("Dead"))
+        {
+            <div class="tc-player-dead-banner mt-3">
+                💀 <strong>You are dead.</strong> You may no longer participate in the game.
+            </div>
+        }
+        @if (GetVisiblePlayerStates()?.Where(s => s != "Dead").Any() == true)
+        {
+            <div class="tc-player-status-panel mt-3">
+                <h6 class="tc-night-order-title">⚠️ Your Status</h6>
+                <ul class="list-unstyled mb-0">
+                    @foreach (var st in GetVisiblePlayerStates()!.Where(s => s != "Dead"))
+                    {
+                        var stateMsg = GetPlayerStateMessage(st);
+                        if (stateMsg != null)
+                        {
+                            <li class="tc-player-status-msg">
+                                <span class="badge bg-@RoleCard.GetStateColorPublic(st) me-2">@st</span>@stateMsg
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
         @if (adminMessages.Count > 0)
         {
             <div class="tc-admin-chat-box mt-3">
@@ -83,6 +109,54 @@
     private bool IsManager = false;
     private List<JoinSessionForm.PreviousSession> previousSessions = new();
     private List<string> adminMessages = new();
+    private HashSet<string> playerStates = new() { "Alive" };
+
+    private static readonly HashSet<string> PlayerVisibleStates = new()
+    {
+        "Dead", "Jailed", "Muted", "Protected", "Saved", "Poisoned", "Cured", "Doused",
+        "Hexed", "Infected", "On Alert", "Transported", "Hypnotized",
+        "Vested", "Revealed", "Remembered", "Resurrected", "Stoned",
+        "Trapped", "Plundered", "Target", "GA Target"
+    };
+
+    private static readonly HashSet<string> OneNightStates = new()
+    {
+        "Jailed", "On Alert", "Protected", "Transported", "Controlled",
+        "Hypnotized", "Muted", "Crusading", "Trapped", "Watched", "Tracked", "Bugged", "Cured"
+    };
+
+    private HashSet<string>? GetVisiblePlayerStates()
+    {
+        var filtered = playerStates.Where(s => PlayerVisibleStates.Contains(s)).ToHashSet();
+        return filtered.Count > 0 ? filtered : null;
+    }
+
+    private static string? GetPlayerStateMessage(string state) => state switch
+    {
+        "Dead"        => "You are dead. You may no longer participate.",
+        "Jailed"      => "You have been jailed tonight. You cannot use your ability and your actions are restricted.",
+        "Muted"       => "You have been blackmailed! You cannot speak today or you will be killed.",
+        "Protected"   => "Someone is watching over you tonight.",
+        "Saved"       => "You were attacked but someone saved your life!",
+        "Poisoned"    => "You have been poisoned! You will die tonight unless cured.",
+        "Cured"       => "A Chemist has cured your poison. You will survive!",
+        "Doused"      => "You smell like gasoline. The Arsonist has doused you!",
+        "Hexed"       => "You have been hexed by the Hex Master.",
+        "Infected"    => "You have been infected by the Plaguebearer.",
+        "On Alert"    => "You are on alert and will kill any visitor tonight.",
+        "Transported" => "You were transported to another location last night.",
+        "Hypnotized"  => "You received a false feedback message last night.",
+        "Vested"      => "You are wearing a bulletproof vest tonight.",
+        "Revealed"    => "You have revealed yourself as Mayor to the town.",
+        "Remembered"  => "You have remembered a role and become it.",
+        "Resurrected" => "You have been brought back from the dead.",
+        "Stoned"      => "You have been stone gazed by Medusa.",
+        "Trapped"     => "You were caught in a Trap Master's trap.",
+        "Plundered"   => "You were plundered by the Pirate.",
+        "Target"      => "You are the Executioner's target. They want you lynched.",
+        "GA Target"   => "A Guardian Angel is watching over you.",
+        _             => null
+    };
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
@@ -177,7 +251,7 @@
                 await StartSignalR();
                 if (session.IsStarted)
                 {
-                    NavigationManager.NavigateTo($"/session-roles?sessionId={session.SessionId}");
+                    NavigationManager.NavigateTo($"/session-roles?sessionId={session.SessionId}&username={Uri.EscapeDataString(joinRequest.Username ?? string.Empty)}");
                 }
                 else
                 {
@@ -250,6 +324,23 @@
         {
             adminMessages.Add(message);
             StateHasChanged();
+        });
+        hubConnection.On<IEnumerable<string>>("StateUpdated", (states) =>
+        {
+            InvokeAsync(() =>
+            {
+                playerStates = new HashSet<string>(states);
+                StateHasChanged();
+            });
+        });
+        hubConnection.On<IEnumerable<string>>("NightStatesReset", (clearedStates) =>
+        {
+            InvokeAsync(() =>
+            {
+                var cleared = new HashSet<string>(clearedStates);
+                playerStates = new HashSet<string>(playerStates.Except(cleared));
+                StateHasChanged();
+            });
         });
         await hubConnection.StartAsync();
         // Subscribe to personal group (for role reveal) and session-wide group (for admin messages)

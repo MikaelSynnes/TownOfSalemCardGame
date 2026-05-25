@@ -39,5 +39,19 @@ namespace TownOfSalemCardGame.Api.Hubs
                 await Clients.Group($"{sessionId}_{targetPlayer}").SendAsync("AdminMessage", message, targetPlayer);
             }
         }
+
+        /// <summary>Pushes a player's updated state set to their personal group so their UI refreshes.</summary>
+        public async Task BroadcastStateUpdate(string sessionId, string playerName, IEnumerable<string> states)
+        {
+            await Clients.Group($"{sessionId}_{playerName}").SendAsync("StateUpdated", states);
+            _logger.LogInformation($"State update sent to {playerName} in session {sessionId}");
+        }
+
+        /// <summary>Tells every player in the session that night states have been reset.</summary>
+        public async Task BroadcastResetNightStates(string sessionId, IEnumerable<string> clearedStates)
+        {
+            await Clients.Group(sessionId).SendAsync("NightStatesReset", clearedStates);
+            _logger.LogInformation($"Night states reset broadcast sent for session {sessionId}");
+        }
     }
 }

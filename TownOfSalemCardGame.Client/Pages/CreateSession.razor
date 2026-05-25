@@ -203,7 +203,7 @@ else
             }
             SessionState.PlayerAssignments = assignments;
             StateHasChanged();
-            NavigationManager.NavigateTo($"/session-roles?sessionId={SessionId}", false);
+            NavigationManager.NavigateTo($"/session-roles?sessionId={SessionId}&username={Uri.EscapeDataString(sessionRequest.Username ?? string.Empty)}", false);
         });
         await hubConnection.StartAsync();
         await hubConnection.InvokeAsync("SubscribeToSession", SessionId);
@@ -244,7 +244,7 @@ else
             Session = await Http.GetFromJsonAsync<Session>($"api/session/{cleanSessionId}");
             if (Session != null && Session.ManagerUsername == sessionRequest.Username && Session.IsStarted)
             {
-                NavigationManager.NavigateTo($"/session-roles?sessionId={SessionId}", true);
+                NavigationManager.NavigateTo($"/session-roles?sessionId={SessionId}&username={Uri.EscapeDataString(sessionRequest.Username ?? string.Empty)}", true);
             }
         }
     }
