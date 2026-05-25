@@ -65,6 +65,12 @@ else if (SessionState.IsManager)
         }
     </div>
 
+    <!-- Reset Night States Button -->
+    <div class="tc-admin-send-panel mt-3">
+        <button class="btn btn-warning" @onclick="ResetNightStates">🌙 Reset Night States (start next night)</button>
+        <small class="text-muted ms-2">Clears: Jailed, On Alert, Protected, Transported, Controlled, Hypnotized, Muted, Crusading, Trapped, Watched, Tracked, Bugged</small>
+    </div>
+
     <!-- Admin Chat Panel -->
     <div class="tc-admin-send-panel mt-4">
         <h5 class="tc-night-order-title">📢 Send Message to Players</h5>
@@ -111,14 +117,33 @@ else
     else
     {
         var faction = GetFaction(myAssignment.Role?.Name);
+        var visibleStates = GetVisibleStatesForPlayer(myAssignment.States);
         <div class="tc-reveal-wrap">
             <RoleCard PlayerName="@myAssignment.Player"
                       RoleName="@(myAssignment.Role?.Name ?? "Unknown")"
                       Description="@myAssignment.Role?.Description"
                       Faction="@faction"
                       IsDead="@(myAssignment.States != null && myAssignment.States.Contains("Dead"))"
-                      States="@myAssignment.States" />
+                      States="@visibleStates" />
         </div>
+        @if (visibleStates != null && visibleStates.Count > 0)
+        {
+            <div class="tc-player-status-panel mt-3">
+                <h6 class="tc-night-order-title">⚠️ Your Status</h6>
+                <ul class="list-unstyled mb-0">
+                    @foreach (var state in visibleStates)
+                    {
+                        var msg = GetPlayerStateMessage(state);
+                        if (msg != null)
+                        {
+                            <li class="tc-player-status-msg tc-status-@state.ToLower().Replace(" ", "-")">
+                                <span class="badge bg-@RoleCard.GetStateColorPublic(state) me-2">@state</span>@msg
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
         @if (receivedMessages.Count > 0)
         {
             <div class="tc-admin-chat-box mt-3">
@@ -154,11 +179,10 @@ else
     // States that are only relevant when a specific role exists anywhere in the session
     private static readonly (string RequiredRole, string State, string Color)[] RoleGatedStates = new[]
     {
-        // Muted — caused by Blackmailer or Jailor
+        // Muted — caused by Blackmailer only
         ("Blackmailer",    "Muted",         "secondary"),
-        ("Jailor",         "Muted",         "secondary"),
         // Protected — caused by any protective role
-        ("Doctor",         "Protected",     "info"),
+
         ("Bodyguard",      "Protected",     "info"),
         ("Crusader",       "Protected",     "info"),
         ("Guardian Angel", "Protected",     "info"),
@@ -172,6 +196,8 @@ else
         ("Veteran",        "On Alert",      "warning"),
         ("Arsonist",       "Doused",        "danger"),
         ("Poisoner",       "Poisoned",      "danger"),
+        ("Chemist",        "Poisoned",      "danger"),
+        ("Chemist",        "Cured",         "success"),
         ("Plaguebearer",   "Infected",      "warning"),
         ("Hex Master",     "Hexed",         "secondary"),
         ("Jailor",         "Jailed",        "secondary"),
@@ -472,6 +498,67 @@ else
         }
 
         return result.OrderBy(e => e.Priority).ThenBy(e => e.Faction).ThenBy(e => e.RoleName).ToList();
+    }
+
+    // States that only persist for one night/day cycle and should be cleared at the start of each night
+    private static readonly HashSet<string> OneNightStates = new()
+    {
+        "Jailed", "On Alert", "Protected", "Transported", "Controlled",
+        "Hypnotized", "Muted", "Crusading", "Trapped", "Watched", "Tracked", "Bugged", "Cured"
+    };
+
+    // States the player themselves can feel/know about
+    private static readonly HashSet<string> PlayerVisibleStates = new()
+    {
+        "Dead", "Jailed", "Muted", "Protected", "Saved", "Poisoned", "Cured", "Doused",
+        "Hexed", "Infected", "On Alert", "Transported", "Hypnotized",
+        "Vested", "Revealed", "Remembered", "Resurrected", "Stoned",
+        "Trapped", "Plundered", "Target", "GA Target"
+    };
+
+    private static HashSet<string>? GetVisibleStatesForPlayer(HashSet<string>? states)
+    {
+        if (states == null) return null;
+        var filtered = states.Where(s => PlayerVisibleStates.Contains(s)).ToHashSet();
+        return filtered.Count > 0 ? filtered : null;
+    }
+
+    private static string? GetPlayerStateMessage(string state) => state switch
+    {
+        "Dead"          => "You are dead. You may no longer participate.",
+        "Jailed"        => "You have been jailed tonight. You cannot use your ability and your actions are restricted.",
+        "Muted"         => "You have been blackmailed! You cannot speak today or you will be killed.",
+        "Protected"     => "Someone is watching over you tonight.",
+        "Saved"         => "You were attacked but someone saved your life!",
+        "Poisoned"      => "You have been poisoned! You will die tonight unless cured.",
+        "Cured"         => "A Chemist has cured your poison. You will survive!",
+        "Doused"        => "You smell like gasoline. The Arsonist has doused you!",
+        "Hexed"         => "You have been hexed by the Hex Master.",
+        "Infected"      => "You have been infected by the Plaguebearer.",
+        "On Alert"      => "You are on alert and will kill any visitor tonight.",
+        "Transported"   => "You were transported to another location last night.",
+        "Hypnotized"    => "You received a false feedback message last night.",
+        "Vested"        => "You are wearing a bulletproof vest tonight.",
+        "Revealed"      => "You have revealed yourself as Mayor to the town.",
+        "Remembered"    => "You have remembered a role and become it.",
+        "Resurrected"   => "You have been brought back from the dead.",
+        "Stoned"        => "You have been stone gazed by Medusa.",
+        "Trapped"       => "You were caught in a Trap Master's trap.",
+        "Plundered"     => "You were plundered by the Pirate.",
+        "Target"        => "You are the Executioner's target. They want you lynched.",
+        "GA Target"     => "A Guardian Angel is watching over you.",
+        _               => null
+    };
+
+    private void ResetNightStates()
+    {
+        if (SessionState.PlayerAssignments == null) return;
+        foreach (var assignment in SessionState.PlayerAssignments)
+        {
+            if (assignment.States == null) continue;
+            assignment.States = new HashSet<string>(assignment.States.Except(OneNightStates));
+        }
+        StateHasChanged();
     }
 
     private void ToggleState(TownOfSalemCardGame.Shared.PlayerRoleAssignment assignment, string state)

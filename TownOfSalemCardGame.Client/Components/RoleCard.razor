@@ -120,7 +120,9 @@
         return $"images/{fileName}";
     }
 
-    private static string StateColor(string state) => state switch
+    private static string StateColor(string state) => GetStateColorPublic(state);
+
+    public static string GetStateColorPublic(string state) => state switch
     {
         "Alive"     => "success",
         "Dead"      => "danger",
@@ -130,6 +132,7 @@
         "Doused"    => "warning",
         "Hexed"     => "purple",
         "Poisoned"  => "dark",
+        "Cured"     => "success",
         "Jailed"    => "primary",
         "Cleaned"   => "light",
         _           => "secondary"

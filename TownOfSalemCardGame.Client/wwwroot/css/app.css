@@ -1464,3 +1464,28 @@ code {
     margin-bottom: 0.5rem;
 }
 }
+
+/* ── Player status notification panel ── */
+.tc-player-status-panel {
+    background: rgba(10, 8, 20, 0.72);
+    border: 1px solid var(--tos-border-glow);
+    border-radius: 8px;
+    padding: 0.85rem 1rem 0.75rem;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.tc-player-status-msg {
+    font-size: 0.9rem;
+    color: var(--tos-text-light, #e8d9b5);
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.tc-player-status-msg:last-child {
+    border-bottom: none;
+}

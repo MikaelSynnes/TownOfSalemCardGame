@@ -24,7 +24,6 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.MapOpenApi();
-app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "My API V1"); });
 
 app.UseHttpsRedirection();
 
