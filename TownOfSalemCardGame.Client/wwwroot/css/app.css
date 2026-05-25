@@ -1251,4 +1251,97 @@ code {
     opacity: 0.4;
     cursor: not-allowed;
 }
+
+/* ========================================================
+   Night Phase Order Panel (admin Session Overview)
+   ======================================================== */
+
+.tc-night-order-panel {
+    background: rgba(10, 8, 20, 0.72);
+    border: 1px solid var(--tos-border-glow);
+    border-radius: 10px;
+    padding: 1.1rem 1.4rem 1rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+
+.tc-night-order-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.2rem;
+}
+
+.tc-night-order-subtitle {
+    font-size: 0.82rem;
+    color: var(--tos-text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.tc-night-order-list {
+    list-style: decimal inside;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.tc-night-order-item {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding: 0.38rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid transparent;
+    transition: background 0.12s;
+}
+
+.tc-night-order-item:hover {
+    background: rgba(255,255,255,0.07);
+}
+
+/* Faction accent colours on left border */
+.tc-night-order-item.tc-faction-town {
+    border-left-color: var(--tos-town-light);
+}
+.tc-night-order-item.tc-faction-mafia {
+    border-left-color: var(--tos-mafia-light);
+}
+.tc-night-order-item.tc-faction-coven {
+    border-left-color: #b06bff;
+}
+.tc-night-order-item.tc-faction-neutral {
+    border-left-color: var(--tos-neutral-light);
+}
+
+.tc-night-order-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.tc-night-order-role {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--tos-text-heading);
+    white-space: nowrap;
+}
+
+.tc-night-order-action {
+    color: var(--tos-text-muted);
+    font-size: 0.85rem;
+    flex: 1;
+}
+
+.tc-night-order-players {
+    font-size: 0.78rem;
+    color: var(--tos-gold);
+    font-style: italic;
+    white-space: nowrap;
+}
 }

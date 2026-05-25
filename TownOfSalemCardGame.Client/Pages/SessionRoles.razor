@@ -14,6 +14,29 @@
 }
 else if (SessionState.IsManager)
 {
+    var nightOrder = GetNightPhaseOrder(SessionState.PlayerAssignments);
+    if (nightOrder.Count > 0)
+    {
+        <div class="tc-night-order-panel mb-4">
+            <h5 class="tc-night-order-title">🌙 Night Phase Order</h5>
+            <p class="tc-night-order-subtitle">Abilities resolve in this order each night (roles in this game only):</p>
+            <ol class="tc-night-order-list">
+                @foreach (var entry in nightOrder)
+                {
+                    <li class="tc-night-order-item tc-faction-@entry.Faction">
+                        <span class="tc-night-order-icon">@entry.Icon</span>
+                        <span class="tc-night-order-role">@entry.RoleName</span>
+                        <span class="tc-night-order-action">— @entry.NightAction</span>
+                        @if (!string.IsNullOrEmpty(entry.Players))
+                        {
+                            <span class="tc-night-order-players">(@entry.Players)</span>
+                        }
+                    </li>
+                }
+            </ol>
+        </div>
+    }
+
     <div class="tc-cards-grid">
         @foreach (var assignment in SessionState.PlayerAssignments)
         {
@@ -44,7 +67,7 @@ else if (SessionState.IsManager)
 else
 {
     var myAssignment = SessionState.PlayerAssignments.FirstOrDefault(a => a.Player == SessionState.Username);
-    @if (myAssignment == null)
+    if (myAssignment == null)
     {
         <div class="tos-alert tos-alert-warn">Your role could not be found.</div>
     }
@@ -175,6 +198,97 @@ else
                 }
             }
         }
+    }
+
+    private record NightOrderEntry(int Priority, string RoleName, string Icon, string Faction, string NightAction, string Players);
+
+    // Standard Town of Salem night priority order (lower number = resolves first)
+    private static readonly (string Role, int Priority, string Action)[] NightPriorityTable = new[]
+    {
+        // Priority 1 – Transporter (swaps happen before everything else)
+        ("Transporter",         1,  "Swaps two players, redirecting all actions targeting them"),
+        // Priority 2 – Jailor (jails target, may execute)
+        ("Jailor",              2,  "Jails a player; can execute them"),
+        // Priority 3 – Veteran (goes on alert; kills all visitors)
+        ("Veteran",             3,  "Goes on alert and kills any visitor"),
+        // Priority 4 – Escort / Consort (roleblock before attacks land)
+        ("Escort",              4,  "Roleblocks a player, preventing their ability"),
+        ("Consort",             4,  "Roleblocks a player, preventing their ability"),
+        // Priority 5 – Witch / Coven Leader (control before actions fire)
+        ("Witch",               5,  "Controls a player, forcing them to target another"),
+        ("Coven Leader",        5,  "Controls a player; with Necronomicon, also kills them"),
+        // Priority 6 – Investigative roles (gather information)
+        ("Sheriff",             6,  "Investigates a player for suspicion"),
+        ("Investigator",        6,  "Investigates a player for a role clue"),
+        ("Consigliere",         6,  "Learns the exact role of a player"),
+        ("Lookout",             6,  "Watches a player to see who visits them"),
+        ("Tracker",             6,  "Tracks a player to see who they visited"),
+        ("Spy",                 6,  "Bugs a player; sees all Mafia chat & visitors"),
+        ("Psychic",             6,  "Receives a vision of innocent or evil players"),
+        ("Coroner",             6,  "Examines a corpse to learn who visited when they died"),
+        // Priority 7 – Protective roles (protect before killers strike)
+        ("Doctor",              7,  "Heals a player, preventing death"),
+        ("Bodyguard",           7,  "Protects a player; kills their attacker"),
+        ("Crusader",            7,  "Protects a player; attacks one of their visitors"),
+        ("Trap Master",         7,  "Places a trap that kills and reveals any evil visitor"),
+        ("Guardian Angel",      7,  "Protects their assigned target"),
+        // Priority 8 – Killers (attacks resolve after protection)
+        ("Godfather",           8,  "Orders the Mafia kill"),
+        ("Mafioso",             8,  "Carries out the Mafia kill"),
+        ("Mafia",               8,  "Carries out a Mafia attack"),
+        ("Vigilante",           8,  "Shoots and kills a chosen player"),
+        ("Serial Killer",       8,  "Kills a chosen player"),
+        ("Arsonist",            8,  "Douses a player in gasoline (or ignites all doused players)"),
+        ("Ambusher",            8,  "Ambushes a house; kills a visitor and reveals themselves"),
+        ("Pirate",              8,  "Plunders a player for loot"),
+        ("Medusa",              8,  "Stone gazes all visitors; with Necronomicon, also attacks remotely"),
+        ("Necromancer",         8,  "Uses a dead player's ability to attack someone"),
+        ("Potion Master",       8,  "Uses one potion: heal, reveal, or kill"),
+        ("Poisoner",            8,  "Poisons a player; they die the following night unless healed"),
+        ("Hex Master",          8,  "Hexes a player; when all living players are hexed they all die"),
+        ("Plaguebearer",        8,  "Infects a player; infects all if they become Pestilence"),
+        // Priority 9 – Support / utility (after kills are decided)
+        ("Medium",              9,  "Speaks with the dead and can relay messages to the living"),
+        ("Retributionist",      9,  "Resurrects a dead Town member to use their ability once"),
+        ("Amnesiac",            9,  "Remembers a dead player's role to become it"),
+        ("Janitor",             9,  "Cleans a dead body, hiding role and last will"),
+        ("Forger",              9,  "Forges a player's last will with false information"),
+        ("Framer",              9,  "Frames a player, making them appear suspicious"),
+        ("Disguiser",           9,  "Disguises themselves as a Town member"),
+        ("Blackmailer",         9,  "Silences a player so they cannot speak during the day"),
+        ("Hypnotist",           9,  "Sends a false feedback message to a player"),
+        ("Executioner",         9,  "Works to get their target lynched (no night action)"),
+        ("Jester",              9,  "Tries to appear suspicious to get lynched (no night action)"),
+        ("Survivor",            9,  "Uses a bulletproof vest to protect themselves"),
+        // Priority 10 – Passive / mayor (no active night ability)
+        ("Mayor",               10, "No night ability; reveals during the day for extra vote power"),
+        ("Townie",              10, "No night ability"),
+        ("Hateful Townie",      10, "No night ability"),
+        ("Peaceful Townie",     10, "No night ability"),
+    };
+
+    private List<NightOrderEntry> GetNightPhaseOrder(List<PlayerRoleAssignment>? assignments)
+    {
+        if (assignments == null || assignments.Count == 0) return new();
+
+        var lookup = NightPriorityTable.ToDictionary(x => x.Role, x => (x.Priority, x.Action));
+        var result = new List<NightOrderEntry>();
+
+        // Group players by role
+        var byRole = assignments
+            .Where(a => a.Role != null)
+            .GroupBy(a => a.Role!.Name)
+            .ToDictionary(g => g.Key, g => string.Join(", ", g.Select(a => a.Player ?? "?")));
+
+        foreach (var (roleName, players) in byRole)
+        {
+            if (!lookup.TryGetValue(roleName, out var info)) continue;
+            var faction = GetFaction(roleName);
+            var icon = GetRoleIcon(roleName);
+            result.Add(new NightOrderEntry(info.Priority, roleName, icon, faction, info.Action, players));
+        }
+
+        return result.OrderBy(e => e.Priority).ThenBy(e => e.Faction).ThenBy(e => e.RoleName).ToList();
     }
 
     private void ToggleState(TownOfSalemCardGame.Shared.PlayerRoleAssignment assignment, string state)
