@@ -5,6 +5,8 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
 @using System.Text.Json
+@using TownOfSalemCardGame.Client.Shared
+@inject SessionState SessionState
 @inject HttpClient Http
 @inject IJSRuntime JS
 
@@ -156,6 +158,8 @@ else
                 IsManager = true;
                 Joined = true;
                 Error = null;
+                SessionState.IsManager = true;
+                SessionState.Username = joinRequest.Username;
                 await SaveCurrentSession();
                 await StartSignalR();
                 // Navigate based on game state
@@ -178,6 +182,8 @@ else
         {
             Joined = true;
             Error = null;
+            SessionState.IsManager = false;
+            SessionState.Username = joinRequest.Username;
             await SaveCurrentSession();
             await StartSignalR();
         }

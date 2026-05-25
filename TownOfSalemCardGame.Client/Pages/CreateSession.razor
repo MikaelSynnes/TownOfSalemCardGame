@@ -107,6 +107,8 @@ else
         {
             var rawSessionId = await response.Content.ReadAsStringAsync();
             SessionId = rawSessionId.Trim('"');
+            SessionState.IsManager = true;
+            SessionState.Username = sessionRequest.Username;
             await StartSignalR();
             await RefreshSession();
             InitializeDefaultRoles();
@@ -213,6 +215,8 @@ else
             {
                 // Use username from query if present, else fallback to manager
                 sessionRequest.Username = !string.IsNullOrEmpty(username) ? username : Session.ManagerUsername;
+                SessionState.IsManager = true;
+                SessionState.Username = sessionRequest.Username;
                 await StartSignalR();
                 await RefreshSession();
             }

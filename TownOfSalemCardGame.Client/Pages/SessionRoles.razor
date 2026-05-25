@@ -5,12 +5,12 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 
-<h3>Player Roles</h3>
+<h3>@(SessionState.IsManager ? "Session Overview" : "Your Role")</h3>
 @if (SessionState.PlayerAssignments == null || SessionState.PlayerAssignments.Count == 0)
 {
     <div class="alert alert-warning">No assignments to display.</div>
 }
-else
+else if (SessionState.IsManager)
 {
     <div class="table-responsive">
         <table class="table table-bordered table-responsive-cards mt-2">
@@ -57,6 +57,34 @@ else
             </tbody>
         </table>
     </div>
+}
+else
+{
+    var myAssignment = SessionState.PlayerAssignments.FirstOrDefault(a => a.Player == SessionState.Username);
+    @if (myAssignment == null)
+    {
+        <div class="alert alert-warning">Your role could not be found.</div>
+    }
+    else
+    {
+        <div class="card border-info mt-4 shadow-sm" style="max-width: 480px;">
+            <div class="card-header bg-info text-white fw-bold">Your Role</div>
+            <div class="card-body">
+                <h4 class="card-title">@myAssignment.Role?.Name</h4>
+                <p class="card-text">@myAssignment.Role?.Description</p>
+                @if (myAssignment.States != null && myAssignment.States.Count > 0)
+                {
+                    <div class="mt-2">
+                        @foreach (var state in myAssignment.States)
+                        {
+                            var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
+                            <span class="badge bg-@color me-1">@state</span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
 }
 
 @code {
