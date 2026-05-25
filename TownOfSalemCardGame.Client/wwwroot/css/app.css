@@ -469,6 +469,52 @@ code {
     display: block;
 }
 
+.tc-art-panel .tc-role-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── Full-image card mode ── */
+.tc-card-image-mode {
+    padding: 0;
+    overflow: visible;
+    width: auto;
+    min-height: unset;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.tc-fullimg-wrap {
+    position: relative;
+    display: inline-block;
+    width: auto;
+}
+
+.tc-role-img-full {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+}
+
+.tc-fullimg-player-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    color: var(--tos-text-heading, #e8d9a0);
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 12px 6px 4px;
+    letter-spacing: 0.04em;
+}
+
 /* ── Divider ── */
 .tc-divider {
     height: 3px;

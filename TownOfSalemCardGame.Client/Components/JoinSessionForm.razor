@@ -1,0 +1,55 @@
+@using TownOfSalemCardGame.Shared
+@using Microsoft.AspNetCore.Components.Forms
+
+<div>
+    @if (PreviousSessions.Count > 0)
+    {
+        <div class="tos-panel mx-auto mb-4" style="max-width: 480px;">
+            <h5 class="tos-panel-title">Previous Sessions</h5>
+            <ul class="ps-list">
+                @foreach (var session in PreviousSessions)
+                {
+                    <li class="ps-item">
+                        <button class="ps-select-btn" @onclick="() => OnSelectPreviousSession.InvokeAsync(session)">
+                            <span class="ps-session-id">@session.SessionId</span>
+                            <span class="ps-username">@session.Username</span>
+                        </button>
+                        <button class="ps-remove-btn" title="Remove" @onclick="() => OnRemovePreviousSession.InvokeAsync(session)">✕</button>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="tos-panel mx-auto" style="max-width: 480px;">
+        <h5 class="tos-panel-title">Enter session details</h5>
+        <EditForm Model="Request" OnValidSubmit="OnSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="tos-field">
+                <label class="tos-label">Session ID</label>
+                <InputText @bind-Value="Request.SessionId" class="tos-input" placeholder="Enter session ID" />
+            </div>
+            <div class="tos-field">
+                <label class="tos-label">Username</label>
+                <InputText @bind-Value="Request.Username" class="tos-input" placeholder="Enter your username" />
+            </div>
+            <button type="submit" class="tos-btn-primary w-100">Join Session</button>
+        </EditForm>
+        @if (Error != null)
+        {
+            <div class="tos-error mt-3">@Error</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public JoinSessionRequest Request { get; set; } = default!;
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public List<PreviousSession> PreviousSessions { get; set; } = new();
+    [Parameter] public EventCallback<PreviousSession> OnSelectPreviousSession { get; set; }
+    [Parameter] public EventCallback<PreviousSession> OnRemovePreviousSession { get; set; }
+    [Parameter] public EventCallback OnSubmit { get; set; }
+
+    public record PreviousSession(string SessionId, string Username, string SavedAt);
+}

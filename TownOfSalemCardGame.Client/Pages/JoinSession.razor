@@ -13,90 +13,58 @@
 
 <h3 class="tos-page-heading">Join Session</h3>
 
-@if (!Joined)
+@switch (currentView)
 {
-    @if (previousSessions.Count > 0)
-    {
-        <div class="tos-panel mx-auto mb-4" style="max-width: 480px;">
-            <h5 class="tos-panel-title">Previous Sessions</h5>
-            <ul class="ps-list">
-                @foreach (var session in previousSessions)
-                {
-                    <li class="ps-item">
-                        <button class="ps-select-btn" @onclick="() => SelectPreviousSession(session)">
-                            <span class="ps-session-id">@session.SessionId</span>
-                            <span class="ps-username">@session.Username</span>
-                        </button>
-                        <button class="ps-remove-btn" title="Remove" @onclick="() => RemovePreviousSession(session)">✕</button>
-                    </li>
-                }
-            </ul>
+    case ViewState.Form:
+        <JoinSessionForm Request="joinRequest"
+                         Error="@Error"
+                         PreviousSessions="previousSessions"
+                         OnSelectPreviousSession="SelectPreviousSession"
+                         OnRemovePreviousSession="RemovePreviousSession"
+                         OnSubmit="JoinSessionHandler" />
+        break;
+
+    case ViewState.Waiting:
+        <div class="tos-alert tos-alert-success">
+            <strong>Joined Session!</strong><br />
+            Session ID: <span class="tos-highlight">@joinRequest.SessionId</span>
         </div>
-    }
+        <div class="tos-alert tos-alert-info mt-4">
+            ⏳ Waiting for host to start the game…
+        </div>
+        break;
 
-    <div class="tos-panel mx-auto" style="max-width: 480px;">
-        <h5 class="tos-panel-title">Enter session details</h5>
-        <EditForm Model="joinRequest" OnValidSubmit="JoinSessionHandler">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-            <div class="tos-field">
-                <label class="tos-label">Session ID</label>
-                <InputText @bind-Value="joinRequest.SessionId" class="tos-input" placeholder="Enter session ID" />
-            </div>
-            <div class="tos-field">
-                <label class="tos-label">Username</label>
-                <InputText @bind-Value="joinRequest.Username" class="tos-input" placeholder="Enter your username" />
-            </div>
-            <button type="submit" class="tos-btn-primary w-100">Join Session</button>
-        </EditForm>
-        @if (Error != null)
-        {
-            <div class="tos-error mt-3">@Error</div>
-        }
-    </div>
-}
-else
-{
-    <div class="tos-alert tos-alert-success">
-        <strong>Joined Session!</strong><br />
-        Session ID: <span class="tos-highlight">@joinRequest.SessionId</span>
-    </div>
-}
-
-@if (Joined && RoleName == null)
-{
-    <div class="tos-alert tos-alert-info mt-4">
-        ⏳ Waiting for host to start the game…
-    </div>
-}
-@if (Joined && RoleName != null)
-{
-    <div class="tc-reveal-wrap">
-        <RoleCard PlayerName="@joinRequest.Username"
-                  RoleName="@RoleName"
-                  Description="@RoleDescription"
-                  Faction="@GetFaction(RoleName)" />
-    </div>
+    case ViewState.RoleReveal:
+        <div class="tos-alert tos-alert-success">
+            <strong>Joined Session!</strong><br />
+            Session ID: <span class="tos-highlight">@joinRequest.SessionId</span>
+        </div>
+        <div class="tc-reveal-wrap">
+            <RoleCard PlayerName="@joinRequest.Username"
+                      RoleName="@RoleName"
+                      Description="@RoleDescription"
+                      Faction="@GetFaction(RoleName)" />
+        </div>
+        break;
 }
 
 @code {
+    private enum ViewState { Form, Waiting, RoleReveal }
+
     private JoinSessionRequest joinRequest = new();
-    private bool Joined = false;
+    private ViewState currentView = ViewState.Form;
     private string? Error;
-    private string? UserRole;
     private string? RoleName;
     private string? RoleDescription;
     private HubConnection? hubConnection;
     private bool IsManager = false;
-    private List<PreviousSession> previousSessions = new();
+    private List<JoinSessionForm.PreviousSession> previousSessions = new();
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    private record PreviousSession(string SessionId, string Username, string SavedAt);
-
     private static readonly HashSet<string> TownRoleNames = new()
     {
-        "Citizen", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
+        "Townie", "Hateful Townie", "Peaceful Townie", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
         "Vigilante", "Veteran", "Medium", "Retributionist", "Transporter", "Jailor",
         "Tracker", "Lookout", "Spy", "Crusader", "Psychic", "Trap Master", "Coroner"
     };
@@ -135,26 +103,26 @@ else
         try
         {
             var result = await JS.InvokeAsync<JsonElement>("previousSessions.getAll");
-            previousSessions = new List<PreviousSession>();
+            previousSessions = new List<JoinSessionForm.PreviousSession>();
             foreach (var item in result.EnumerateArray())
             {
                 var sessionId = item.GetProperty("sessionId").GetString() ?? "";
                 var username = item.GetProperty("username").GetString() ?? "";
                 var savedAt = item.TryGetProperty("savedAt", out var sa) ? sa.GetString() ?? "" : "";
-                previousSessions.Add(new PreviousSession(sessionId, username, savedAt));
+                previousSessions.Add(new JoinSessionForm.PreviousSession(sessionId, username, savedAt));
             }
         }
         catch { previousSessions = new(); }
     }
 
-    private void SelectPreviousSession(PreviousSession session)
+    private void SelectPreviousSession(JoinSessionForm.PreviousSession session)
     {
         joinRequest.SessionId = session.SessionId;
         joinRequest.Username = session.Username;
         Error = null;
     }
 
-    private async Task RemovePreviousSession(PreviousSession session)
+    private async Task RemovePreviousSession(JoinSessionForm.PreviousSession session)
     {
         await JS.InvokeVoidAsync("previousSessions.remove", session.SessionId, session.Username);
         previousSessions.Remove(session);
@@ -176,21 +144,18 @@ else
             if (session != null && session.ManagerUsername == joinRequest.Username)
             {
                 IsManager = true;
-                Joined = true;
+                currentView = ViewState.Waiting;
                 Error = null;
                 SessionState.IsManager = true;
                 SessionState.Username = joinRequest.Username;
                 await SaveCurrentSession();
                 await StartSignalR();
-                // Navigate based on game state
                 if (session.IsStarted)
                 {
-                    // Pass sessionId as query parameter to session-roles
                     NavigationManager.NavigateTo($"/session-roles?sessionId={session.SessionId}");
                 }
                 else
                 {
-                    // Pass sessionId as query parameter to create-session
                     NavigationManager.NavigateTo($"/create-session?sessionId={session.SessionId}");
                 }
                 return;
@@ -201,7 +166,7 @@ else
         if (response.IsSuccessStatusCode)
         {
             var session = await response.Content.ReadFromJsonAsync<Session>();
-            Joined = true;
+            currentView = ViewState.Waiting;
             Error = null;
             SessionState.IsManager = false;
             SessionState.Username = joinRequest.Username;
@@ -216,6 +181,7 @@ else
                 {
                     RoleName = existing.Role.Name;
                     RoleDescription = existing.Role.Description;
+                    currentView = ViewState.RoleReveal;
                     StateHasChanged();
                 }
             }
@@ -244,13 +210,13 @@ else
         hubConnection.On<object>("ReceiveRole", (data) =>
         {
             _ = JS.InvokeVoidAsync("console.log", $"SignalR ReceiveRole message received. Raw data: {System.Text.Json.JsonSerializer.Serialize(data)}");
-            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             if (data is System.Text.Json.JsonElement element && element.ValueKind == System.Text.Json.JsonValueKind.Object)
             {
                 if (element.TryGetProperty("name", out var nameProp))
                     RoleName = nameProp.GetString();
                 if (element.TryGetProperty("description", out var descProp))
                     RoleDescription = descProp.GetString();
+                currentView = ViewState.RoleReveal;
                 StateHasChanged();
             }
         });

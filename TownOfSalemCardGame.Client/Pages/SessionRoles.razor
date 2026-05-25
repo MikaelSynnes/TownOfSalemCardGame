@@ -25,7 +25,8 @@ else if (SessionState.IsManager)
                       Description="@a.Role?.Description"
                       Faction="@faction"
                       IsDead="@isDead"
-                      States="@a.States">
+                      States="@a.States"
+                      Classic="true">
                 <ActionContent>
                     @foreach (var (state, color) in StateOptions)
                     {
@@ -74,7 +75,7 @@ else
 
     private static readonly HashSet<string> TownRoleNames = new()
     {
-        "Citizen", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
+        "Townie", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
         "Vigilante", "Veteran", "Medium", "Retributionist", "Transporter", "Jailor",
         "Tracker", "Lookout", "Spy", "Crusader", "Psychic", "Trap Master", "Coroner"
     };

@@ -46,7 +46,9 @@ else
     private List<RoleInfo> AvailableRoles = new()
     {
         // Town
-        new RoleInfo { Name = "Citizen", Description = "An innocent citizen. Find and vote out the mafia.", Count = 0 },
+        new RoleInfo { Name = "Townie", Description = "An innocent citizen. Find and vote out the mafia.", Count = 0 },
+        new RoleInfo { Name = "Hateful Townie", Description = "An innocent citizen who must vote guilty on all executions or they lose their will to fight. Wins with the Town.", Count = 0 },
+        new RoleInfo { Name = "Peaceful Townie", Description = "An innocent citizen who cannot bring themselves to vote guilty. Must abstain from all execution votes. Wins with the Town.", Count = 0 },
         new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine if they are suspicious.", Count = 0 },
         new RoleInfo { Name = "Doctor", Description = "Can heal one player each night, preventing them from dying.", Count = 0 },
         new RoleInfo { Name = "Investigator", Description = "Can investigate one player per night and receive a clue about their role.", Count = 0 },
@@ -57,12 +59,12 @@ else
         new RoleInfo { Name = "Veteran", Description = "Can go on alert at night, killing anyone who visits them.", Count = 0 },
         new RoleInfo { Name = "Medium", Description = "Can speak with the dead at night and relay messages to the living.", Count = 0 },
         new RoleInfo { Name = "Retributionist", Description = "Can resurrect one dead Town member to use their ability once.", Count = 0 },
-        new RoleInfo { Name = "Transporter", Description = "Can swap two players' positions at night, redirecting all actions between them.", Count = 0 },
+        // new RoleInfo { Name = "Transporter", Description = "Can swap two players' positions at night, redirecting all actions between them.", Count = 0 },
         new RoleInfo { Name = "Jailor", Description = "Can jail a player at night, preventing all actions on or by them, and may execute them.", Count = 0 },
-        new RoleInfo { Name = "Tracker", Description = "Can track one player to see who they visited last night.", Count = 0 },
+        // new RoleInfo { Name = "Tracker", Description = "Can track one player to see who they visited last night.", Count = 0 },
         new RoleInfo { Name = "Lookout", Description = "Can watch a player to see who visited them last night.", Count = 0 },
-        new RoleInfo { Name = "Crusader", Description = "Can protect a player and attack one of their visitors each night.", Count = 0 },
-        new RoleInfo { Name = "Psychic", Description = "Receives visions at night revealing groups of innocent or evil players.", Count = 0 },
+        // new RoleInfo { Name = "Crusader", Description = "Can protect a player and attack one of their visitors each night.", Count = 0 },
+        // new RoleInfo { Name = "Psychic", Description = "Receives visions at night revealing groups of innocent or evil players.", Count = 0 },
         new RoleInfo { Name = "Trap Master", Description = "Can place a trap on a player that kills and reveals any evil visitor.", Count = 0 },
         new RoleInfo { Name = "Coroner", Description = "Can examine a dead body at night to learn who visited them when they died.", Count = 0 },
         // Mafia
@@ -79,7 +81,7 @@ else
         new RoleInfo { Name = "Ambusher", Description = "Can ambush a player's house, killing one of their visitors and revealing the ambush.", Count = 0 },
         // Neutral
         new RoleInfo { Name = "Serial Killer", Description = "A lone killer who eliminates one player each night. Wins alone.", Count = 0 },
-        new RoleInfo { Name = "Arsonist", Description = "Can douse players in gasoline and ignite them all at once. Wins alone.", Count = 0 },
+        // new RoleInfo { Name = "Arsonist", Description = "Can douse players in gasoline and ignite them all at once. Wins alone.", Count = 0 },
         new RoleInfo { Name = "Witch", Description = "Can control a player each night, forcing them to target another.", Count = 0 },
         new RoleInfo { Name = "Jester", Description = "Wins by getting lynched by the town during the day.", Count = 0 },
         new RoleInfo { Name = "Executioner", Description = "Has a target and wins by getting that specific player lynched by the town.", Count = 0 },
@@ -87,8 +89,8 @@ else
         new RoleInfo { Name = "Guardian Angel", Description = "Has a target they protect. Wins if their target survives to the end of the game.", Count = 0 },
         new RoleInfo { Name = "Survivor", Description = "Has no special ability, but wins by simply surviving to the end of the game.", Count = 0 },
         // Coven
-        new RoleInfo { Name = "Potion Master", Description = "Has three potions: heal, reveal role, and kill. Can use one per night.", Count = 0 },
-        new RoleInfo { Name = "Poisoner", Description = "Can poison a player, causing them to die the following night unless healed.", Count = 0 },
+        // new RoleInfo { Name = "Potion Master", Description = "Has three potions: heal, reveal role, and kill. Can use one per night.", Count = 0 },
+        // new RoleInfo { Name = "Poisoner", Description = "Can poison a player, causing them to die the following night unless healed.", Count = 0 },
         // new RoleInfo { Name = "Coven Leader", Description = "The leader of the Coven. Can control a player and, with the Necronomicon, kill them.", Count = 0 },
         // new RoleInfo { Name = "Medusa", Description = "Can stone gaze all visitors to her house, killing them. With Necronomicon, can petrify from afar.", Count = 0 },
         // new RoleInfo { Name = "Necromancer", Description = "Can use the ability of a dead player to target someone each night.", Count = 0 },
@@ -254,9 +256,9 @@ else
     private void AutoAdjustCitizens()
     {
         var players = Session?.Participants?.Count ?? 0;
-        var citizen = AvailableRoles.FirstOrDefault(r => r.Name == "Citizen");
+        var citizen = AvailableRoles.FirstOrDefault(r => r.Name == "Townie");
         if (citizen == null) return;
-        var otherTotal = AvailableRoles.Where(r => r.Name != "Citizen").Sum(r => r.Count);
+        var otherTotal = AvailableRoles.Where(r => r.Name != "Townie").Sum(r => r.Count);
         citizen.Count = Math.Max(0, players - otherTotal);
     }
 
@@ -266,7 +268,7 @@ else
         if (players == 0) return;
         foreach (var r in AvailableRoles) r.Count = 0;
         var mafia = AvailableRoles.FirstOrDefault(r => r.Name == "Mafia");
-        var citizen = AvailableRoles.FirstOrDefault(r => r.Name == "Citizen");
+        var citizen = AvailableRoles.FirstOrDefault(r => r.Name == "Townie");
         if (mafia != null) mafia.Count = Math.Min(1, players);
         if (citizen != null) citizen.Count = Math.Max(0, players - (mafia?.Count ?? 0));
     }
@@ -274,7 +276,7 @@ else
     private void IncreaseRole(RoleInfo role)
     {
         role.Count++;
-        if (role.Name != "Citizen")
+        if (role.Name != "Townie")
             AutoAdjustCitizens();
     }
 
@@ -283,7 +285,7 @@ else
         if (role.Count > 0)
         {
             role.Count--;
-            if (role.Name != "Citizen")
+            if (role.Name != "Townie")
                 AutoAdjustCitizens();
         }
     }

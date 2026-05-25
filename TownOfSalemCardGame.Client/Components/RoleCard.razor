@@ -1,53 +1,89 @@
 @using TownOfSalemCardGame.Shared
 @using Microsoft.AspNetCore.Components
 
-<div class="tc-card faction-@Faction @(IsDead ? "state-dead" : "") @CssClass">
-    @* ── top ornament bar ── *@
-    <div class="tc-top-bar">
-        <span class="tc-player-name">@PlayerName</span>
-        <span class="tc-faction-badge">@Faction</span>
-    </div>
-
-    @* ── role title banner ── *@
-    <div class="tc-title-banner">
-        <span class="tc-role-name">@RoleName</span>
-    </div>
-
-    @* ── artwork panel ── *@
-    <div class="tc-art-panel">
-        @((MarkupString)RoleCardArt.Get(RoleName))
-    </div>
-
-    @* ── divider line with faction colour ── *@
-    <div class="tc-divider"></div>
-
-    @* ── description text box ── *@
-    <div class="tc-desc-box">
-        <p class="tc-desc">@Description</p>
-    </div>
-
-    @* ── states bar ── *@
-    @if (States != null && States.Count > 0)
+<div class="tc-card faction-@Faction @(IsDead ? "state-dead" : "") @(!Classic && !_imageLoadFailed ? "tc-card-image-mode" : "") @CssClass">
+    @if (!Classic && !_imageLoadFailed)
     {
-        <div class="tc-states-bar">
-            @foreach (var state in States)
+        @* ── full-size role image (contains all text/art) ── *@
+        <div class="tc-fullimg-wrap">
+            <img src="@GetRoleImagePath(RoleName)"
+                 alt="@RoleName"
+                 class="tc-role-img-full"
+                 @onerror="OnImageError" />
+            @* ── player name overlay ── *@
+            @if (!string.IsNullOrEmpty(PlayerName))
             {
-                var color = StateColor(state);
-                <span class="badge bg-@color">@state</span>
-            }
-            @if (HasNecronomicon)
-            {
-                <span class="badge bg-dark" title="Holds the Necronomicon">📖 Necronomicon</span>
+                <div class="tc-fullimg-player-name">@PlayerName</div>
             }
         </div>
+
+        @* ── states bar ── *@
+        @if (States != null && States.Count > 0)
+        {
+            <div class="tc-states-bar">
+                @foreach (var state in States)
+                {
+                    var color = StateColor(state);
+                    <span class="badge bg-@color">@state</span>
+                }
+                @if (HasNecronomicon)
+                {
+                    <span class="badge bg-dark" title="Holds the Necronomicon">📖 Necronomicon</span>
+                }
+            </div>
+        }
+
+        @* ── action buttons footer ── *@
+        @if (ActionContent != null)
+        {
+            <div class="tc-actions">
+                @ActionContent
+            </div>
+        }
     }
-
-    @* ── action buttons footer ── *@
-    @if (ActionContent != null)
+    else
     {
-        <div class="tc-actions">
-            @ActionContent
+        @* ── fallback: SVG art with full card layout ── *@
+        <div class="tc-top-bar">
+            <span class="tc-player-name">@PlayerName</span>
+            <span class="tc-faction-badge">@Faction</span>
         </div>
+
+        <div class="tc-title-banner">
+            <span class="tc-role-name">@RoleName</span>
+        </div>
+
+        <div class="tc-art-panel">
+            @((MarkupString)RoleCardArt.Get(RoleName))
+        </div>
+
+        <div class="tc-divider"></div>
+
+        <div class="tc-desc-box">
+            <p class="tc-desc">@Description</p>
+        </div>
+
+        @if (States != null && States.Count > 0)
+        {
+            <div class="tc-states-bar">
+                @foreach (var state in States)
+                {
+                    var color = StateColor(state);
+                    <span class="badge bg-@color">@state</span>
+                }
+                @if (HasNecronomicon)
+                {
+                    <span class="badge bg-dark" title="Holds the Necronomicon">📖 Necronomicon</span>
+                }
+            </div>
+        }
+
+        @if (ActionContent != null)
+        {
+            <div class="tc-actions">
+                @ActionContent
+            </div>
+        }
     }
 </div>
 
@@ -61,6 +97,28 @@
     [Parameter] public HashSet<string>? States { get; set; }
     [Parameter] public RenderFragment? ActionContent { get; set; }
     [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public bool Classic { get; set; }
+
+    private bool _imageLoadFailed;
+
+    protected override void OnParametersSet()
+    {
+        _imageLoadFailed = false;
+    }
+
+    private void OnImageError()
+    {
+        _imageLoadFailed = true;
+        StateHasChanged();
+    }
+
+    private static string GetRoleImagePath(string? roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName)) return string.Empty;
+        // Remove spaces to match filenames like "HatefulTownie.png", "SerialKiller.png"
+        var fileName = roleName.Replace(" ", "") + ".png";
+        return $"images/{fileName}";
+    }
 
     private static string StateColor(string state) => state switch
     {

@@ -9,7 +9,7 @@ public static class RoleCardArt
     public static string Get(string? roleName) => roleName switch
     {
         // ── Town ──────────────────────────────────────────────────────────────
-        "Citizen" => """
+        "Townie" => """
             <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
               <rect width="200" height="140" fill="#1a2e1a"/>
               <!-- house -->

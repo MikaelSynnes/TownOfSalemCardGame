@@ -29,7 +29,7 @@ public abstract class RoleInfoBase
 // --- Town Roles ---
 public class CitizenRole : RoleInfoBase
 {
-    public override string Name => "Citizen";
+    public override string Name => "Townie";
     public override string Description => "An innocent citizen. Find and vote out the mafia.";
 }
 
@@ -145,6 +145,18 @@ public class CoronerRole : RoleInfoBase
 {
     public override string Name => "Coroner";
     public override string Description => "Can examine a dead body at night to learn who visited them when they died.";
+}
+
+public class HatefulTownieRole : RoleInfoBase
+{
+    public override string Name => "Hateful Townie";
+    public override string Description => "An innocent citizen who must vote guilty on at least one execution or they lose their will to fight. Wins with the Town.";
+}
+
+public class PeacefulTownieRole : RoleInfoBase
+{
+    public override string Name => "Peaceful Townie";
+    public override string Description => "An innocent citizen who cannot bring themselves to vote guilty. Must abstain from all execution votes. Wins with the Town.";
 }
 
 // --- Mafia Roles ---

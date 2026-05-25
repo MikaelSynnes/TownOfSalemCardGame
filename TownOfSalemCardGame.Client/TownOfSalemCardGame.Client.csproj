@@ -18,4 +18,19 @@
     <ProjectReference Include="..\TownOfSalemCardGame.Shared\TownOfSalemCardGame.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Images\Citizen.png" />
+    <None Include="wwwroot\Images\Doctor.png" />
+    <None Include="wwwroot\Images\Escort.png" />
+    <None Include="wwwroot\Images\HatefulTownie.png" />
+    <None Include="wwwroot\Images\Investigator.png" />
+    <None Include="wwwroot\Images\Sheriff.png" />
+    <None Include="wwwroot\Images\Townie.png" />
+    <None Include="wwwroot\Images\Vigilante.png" />
+  </ItemGroup>
+
 </Project>
