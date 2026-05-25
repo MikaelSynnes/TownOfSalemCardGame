@@ -12,47 +12,51 @@
 }
 else
 {
-    <table class="table table-bordered mt-2">
-        <thead>
-            <tr>
-                <th>Player</th>
-                <th>Role</th>
-                <th>Description</th>
-                <th>States</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var assignment in SessionState.PlayerAssignments)
-            {
+    <div class="table-responsive">
+        <table class="table table-bordered table-responsive-cards mt-2">
+            <thead>
                 <tr>
-                    <td>@assignment.Player</td>
-                    <td>@assignment.Role?.Name</td>
-                    <td>@assignment.Role?.Description</td>
-                    <td>
-                        @if (assignment.States != null && assignment.States.Count > 0)
-                        {
-                            @foreach (var state in assignment.States)
-                            {
-                                var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                                <span class="badge bg-@color me-1">@state</span>
-                            }
-                        }
-                        else
-                        {
-                            <span class="text-muted">None</span>
-                        }
-                    </td>
-                    <td>
-                        @foreach (var (state, color) in StateOptions)
-                        {
-                            <button class="btn btn-sm @(assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color) me-1" @onclick="() => ToggleState(assignment, state)">@state</button>
-                        }
-                    </td>
+                    <th>Player</th>
+                    <th>Role</th>
+                    <th>Description</th>
+                    <th>States</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var assignment in SessionState.PlayerAssignments)
+                {
+                    <tr>
+                        <td data-label="Player">@assignment.Player</td>
+                        <td data-label="Role">@assignment.Role?.Name</td>
+                        <td data-label="Description">@assignment.Role?.Description</td>
+                        <td data-label="States">
+                            @if (assignment.States != null && assignment.States.Count > 0)
+                            {
+                                @foreach (var state in assignment.States)
+                                {
+                                    var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
+                                    <span class="badge bg-@color me-1">@state</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">None</span>
+                            }
+                        </td>
+                        <td data-label="Actions">
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var (state, color) in StateOptions)
+                                {
+                                    <button class="btn btn-sm @(assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)" @onclick="() => ToggleState(assignment, state)">@state</button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

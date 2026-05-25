@@ -4,11 +4,14 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">TownOfSalemCardGame.Client</a>
+        <a class="navbar-brand" href="">⚖️ Town of Salem</a>
+        <button class="navbar-toggler" @onclick="ToggleNavMenu" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
     </div>
 </div>
 
-<div class="nav-scrollable">
+<div class="@NavMenuCssClass nav-scrollable" @onclick="CollapseNavMenu">
     <nav class="nav flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/create-session" Match="NavLinkMatch.All">
@@ -21,7 +24,7 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <button class="btn btn-outline-light w-100" @onclick="JoinExistingGameFromCookie">
+            <button class="btn btn-outline-light w-100" @onclick:stopPropagation @onclick="JoinExistingGameFromCookie">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Join Existing Game
             </button>
             @if (!string.IsNullOrEmpty(joinError))
@@ -33,7 +36,13 @@
 </div>
 
 @code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private string joinError;
+
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+    private void CollapseNavMenu() => collapseNavMenu = true;
+
     private async Task JoinExistingGameFromCookie()
     {
         joinError = null;

@@ -48,3 +48,9 @@ wwwroot/lib/
 
 # Local development secrets
 secrets.json
+/.vs/CopilotSnapshots
+/.vs/TownOfSalemCardGame/copilot-chat/c93e45cd/sessions
+/.vs/TownOfSalemCardGame/CopilotIndices/18.6.39588.17144
+/.vs/TownOfSalemCardGame/DesignTimeBuild
+*.vsidx
+/.vs/TownOfSalemCardGame/v18

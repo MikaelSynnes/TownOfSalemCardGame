@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AssemblyName>TownOfSalemCardGame.Api</AssemblyName>
@@ -9,13 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4"/>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\TownOfSalemCardGame.Shared\TownOfSalemCardGame.Shared.csproj"/>
+        <ProjectReference Include="..\TownOfSalemCardGame.Shared\TownOfSalemCardGame.Shared.csproj" />
     </ItemGroup>
 
 </Project>

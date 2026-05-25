@@ -13,15 +13,20 @@
 
 @if (SessionId == null)
 {
-    <EditForm Model="sessionRequest" OnValidSubmit="CreateSessionHandler">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div class="mb-3">
-            <label>Username:</label>
-            <InputText @bind-Value="sessionRequest.Username" class="form-control" />
+    <div class="card shadow-sm mx-auto" style="max-width: 480px;">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Start a new game</h5>
+            <EditForm Model="sessionRequest" OnValidSubmit="CreateSessionHandler">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="mb-3">
+                    <label class="form-label">Username:</label>
+                    <InputText @bind-Value="sessionRequest.Username" class="form-control" placeholder="Enter your username" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create Session</button>
+            </EditForm>
         </div>
-        <button type="submit" class="btn btn-primary">Create Session</button>
-    </EditForm>
+    </div>
 }
 else
 {
@@ -49,57 +54,65 @@ else
     @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username)
     {
         <h5 class="mt-4">Assign Roles</h5>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Role</th>
-                    <th>Description</th>
-                    <th>Count</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var role in AvailableRoles)
-                {
-                    <tr>
-                        <td>@role.Name</td>
-                        <td>@role.Description</td>
-                        <td>@role.Count</td>
-                        <td>
-                            <button class="btn btn-sm btn-secondary me-1" @onclick="() => DecreaseRole(role)">-</button>
-                            <button class="btn btn-sm btn-secondary" @onclick="() => IncreaseRole(role)">+</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <button class="btn btn-success" @onclick="StartGame">Start Game</button>
-    }
-
-    // UI section for manager to see all player roles
-    @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username && PlayerAssignments != null)
-    {
-        <div class="alert alert-info mt-4">
-            <strong>Player Roles:</strong>
-            <table class="table table-bordered mt-2">
+        <div class="table-responsive">
+            <table class="table table-responsive-cards">
                 <thead>
                     <tr>
-                        <th>Player</th>
                         <th>Role</th>
                         <th>Description</th>
+                        <th>Count</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var assignment in PlayerAssignments)
+                    @foreach (var role in AvailableRoles)
                     {
                         <tr>
-                            <td>@assignment.Player</td>
-                            <td>@assignment.Role?.Name</td>
-                            <td>@assignment.Role?.Description</td>
+                            <td data-label="Role">@role.Name</td>
+                            <td data-label="Description">@role.Description</td>
+                            <td data-label="Count">@role.Count</td>
+                            <td data-label="Actions">
+                                <button class="btn btn-sm btn-secondary me-1" @onclick="() => DecreaseRole(role)">−</button>
+                                <button class="btn btn-sm btn-secondary" @onclick="() => IncreaseRole(role)">+</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </div>
+        <div class="mt-3">
+            <span class="@(AvailableRoles.Sum(r => r.Count) == (Session?.Participants?.Count ?? 0) ? "text-success" : "text-danger") fw-bold">
+                Roles assigned: @AvailableRoles.Sum(r => r.Count) / @(Session?.Participants?.Count ?? 0) players
+            </span>
+        </div>
+        <button class="btn btn-success mt-2" @onclick="StartGame" disabled="@(AvailableRoles.Sum(r => r.Count) != (Session?.Participants?.Count ?? 0) || (Session?.Participants?.Count ?? 0) == 0)">Start Game</button>
+    }
+
+    @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username && PlayerAssignments != null)
+    {
+        <div class="alert alert-info mt-4">
+            <strong>Player Roles:</strong>
+            <div class="table-responsive mt-2">
+                <table class="table table-bordered table-responsive-cards">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Role</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var assignment in PlayerAssignments)
+                        {
+                            <tr>
+                                <td data-label="Player">@assignment.Player</td>
+                                <td data-label="Role">@assignment.Role?.Name</td>
+                                <td data-label="Description">@assignment.Role?.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     }
 }
@@ -135,6 +148,7 @@ else
             SessionId = rawSessionId.Trim('"');
             await StartSignalR();
             await RefreshSession();
+            InitializeDefaultRoles();
         }
         else
         {
@@ -189,6 +203,7 @@ else
                     Participants = updatedSession.Participants != null ? new List<string>(updatedSession.Participants) : new List<string>()
                 };
                 _ = JS.InvokeVoidAsync("console.log", $"Session updated (new object): {System.Text.Json.JsonSerializer.Serialize(Session)}");
+                InitializeDefaultRoles();
                 StateHasChanged();
             }
         });
@@ -273,12 +288,40 @@ else
         }
     }
 
+    private void AutoAdjustCitizens()
+    {
+        var players = Session?.Participants?.Count ?? 0;
+        var citizen = AvailableRoles.FirstOrDefault(r => r.Name == "Citizen");
+        if (citizen == null) return;
+        var otherTotal = AvailableRoles.Where(r => r.Name != "Citizen").Sum(r => r.Count);
+        citizen.Count = Math.Max(0, players - otherTotal);
+    }
+
+    private void InitializeDefaultRoles()
+    {
+        var players = Session?.Participants?.Count ?? 0;
+        if (players == 0) return;
+        foreach (var r in AvailableRoles) r.Count = 0;
+        var mafia = AvailableRoles.FirstOrDefault(r => r.Name == "Mafia");
+        var citizen = AvailableRoles.FirstOrDefault(r => r.Name == "Citizen");
+        if (mafia != null) mafia.Count = Math.Min(1, players);
+        if (citizen != null) citizen.Count = Math.Max(0, players - (mafia?.Count ?? 0));
+    }
+
     private void IncreaseRole(RoleInfo role)
     {
         role.Count++;
+        if (role.Name != "Citizen")
+            AutoAdjustCitizens();
     }
+
     private void DecreaseRole(RoleInfo role)
     {
-        if (role.Count > 0) role.Count--;
+        if (role.Count > 0)
+        {
+            role.Count--;
+            if (role.Name != "Citizen")
+                AutoAdjustCitizens();
+        }
     }
 }

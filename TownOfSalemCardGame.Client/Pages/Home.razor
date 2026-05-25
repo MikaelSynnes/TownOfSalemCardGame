@@ -3,5 +3,55 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Welcome to Town of Salem Card Game!</h1>
-<p class="lead">Get started by creating or joining a session using the navigation menu.</p>
+<div class="home-hero">
+    <h1 class="home-title">⚖️ Town of Salem</h1>
+    <p class="home-subtitle">Card Game</p>
+    <p class="home-desc">Gather your friends, assign roles, and uncover the truth — or hide it.</p>
+    <div class="home-actions">
+        <a href="/create-session" class="btn btn-primary btn-lg">Create Session</a>
+        <a href="/join-session" class="btn btn-outline-secondary btn-lg">Join Session</a>
+    </div>
+</div>
+
+<style>
+    .home-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .home-title {
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .home-subtitle {
+        font-size: clamp(1rem, 4vw, 1.5rem);
+        color: #6c757d;
+        margin-top: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .home-desc {
+        font-size: 1.1rem;
+        color: #495057;
+        max-width: 400px;
+        margin-bottom: 2rem;
+    }
+
+    .home-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .home-actions .btn {
+        min-width: 160px;
+    }
+</style>
