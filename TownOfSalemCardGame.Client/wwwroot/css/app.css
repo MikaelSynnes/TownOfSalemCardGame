@@ -1,5 +1,44 @@
+/* ========================================================
+   Town of Salem — Dark Theme
+   ======================================================== */
+
+:root {
+    --tos-bg:           #0e0c0a;
+    --tos-surface:      #1a1612;
+    --tos-surface-2:    #231e18;
+    --tos-surface-3:    #2e2720;
+    --tos-border:       #4a3c2a;
+    --tos-border-glow:  #8b6914;
+    --tos-gold:         #c9a84c;
+    --tos-gold-light:   #e8c96d;
+    --tos-red:          #8b1a1a;
+    --tos-red-light:    #c0392b;
+    --tos-town:         #2e5c2e;
+    --tos-town-light:   #4caf50;
+    --tos-mafia:        #1a1a4e;
+    --tos-mafia-light:  #3949ab;
+    --tos-coven:        #3d1a6e;
+    --tos-coven-light:  #9c27b0;
+    --tos-neutral:      #3d3a1a;
+    --tos-neutral-light:#c0b04c;
+    --tos-text:         #d4c9b0;
+    --tos-text-muted:   #7a6e5a;
+    --tos-text-heading: #e8d9a0;
+    --tos-shadow:       0 4px 24px rgba(0,0,0,0.7);
+    --tos-glow:         0 0 12px rgba(201,168,76,0.3);
+}
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Crimson Text', Georgia, serif;
+    background-color: var(--tos-bg);
+    color: var(--tos-text);
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+    color: var(--tos-text-heading);
+    letter-spacing: 0.04em;
 }
 
 h1:focus {
@@ -7,40 +46,242 @@ h1:focus {
 }
 
 a, .btn-link {
-    color: #0071c1;
+    color: var(--tos-gold);
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+a:hover {
+    color: var(--tos-gold-light);
 }
+
+/* --- Buttons --- */
+.btn-primary {
+    color: var(--tos-bg);
+    background-color: var(--tos-gold);
+    border-color: var(--tos-gold-light);
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--tos-gold-light);
+    border-color: var(--tos-gold-light);
+    color: var(--tos-bg);
+}
+
+.btn-success {
+    background-color: var(--tos-town);
+    border-color: var(--tos-town-light);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: var(--tos-town-light);
+    border-color: var(--tos-town-light);
+    color: #000;
+}
+
+.btn-danger {
+    background-color: var(--tos-red);
+    border-color: var(--tos-red-light);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: var(--tos-red-light);
+    border-color: var(--tos-red-light);
+}
+
+.btn-secondary {
+    background-color: var(--tos-surface-3);
+    border-color: var(--tos-border);
+    color: var(--tos-text);
+}
+
+.btn-secondary:hover {
+    background-color: var(--tos-border);
+    border-color: var(--tos-border-glow);
+    color: var(--tos-text-heading);
+}
+
+.btn-outline-success { color: var(--tos-town-light); border-color: var(--tos-town-light); }
+.btn-outline-success:hover { background-color: var(--tos-town); color: #fff; }
+.btn-outline-danger  { color: var(--tos-red-light);  border-color: var(--tos-red-light);  }
+.btn-outline-danger:hover  { background-color: var(--tos-red);   color: #fff; }
+.btn-outline-secondary { color: var(--tos-text-muted); border-color: var(--tos-border); }
+.btn-outline-secondary:hover { background-color: var(--tos-surface-3); color: var(--tos-text); border-color: var(--tos-border-glow); }
+.btn-outline-info    { color: #5bc0de; border-color: #5bc0de; }
+.btn-outline-info:hover    { background-color: #1a4a5e; color: #fff; }
+.btn-outline-warning { color: var(--tos-neutral-light); border-color: var(--tos-neutral-light); }
+.btn-outline-warning:hover { background-color: var(--tos-neutral); color: #fff; }
+.btn-outline-dark    { color: var(--tos-coven-light); border-color: var(--tos-coven-light); }
+.btn-outline-dark:hover    { background-color: var(--tos-coven); color: #fff; }
+.btn-outline-primary { color: var(--tos-mafia-light); border-color: var(--tos-mafia-light); }
+.btn-outline-primary:hover { background-color: var(--tos-mafia); color: #fff; }
+.btn-outline-light   { color: var(--tos-text); border-color: var(--tos-border); }
+.btn-outline-light:hover   { background-color: var(--tos-surface-3); color: var(--tos-text-heading); }
+.btn-outline-purple  { color: #ce93d8; border-color: #ce93d8; }
+.btn-outline-purple:hover  { background-color: #4a1a6e; color: #fff; }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.15rem rgba(201,168,76,0.4);
 }
 
+/* --- Forms --- */
+.form-control, .form-select {
+    background-color: var(--tos-surface-2);
+    border: 1px solid var(--tos-border);
+    color: var(--tos-text);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--tos-surface-3);
+    border-color: var(--tos-gold);
+    color: var(--tos-text-heading);
+    box-shadow: 0 0 0 0.15rem rgba(201,168,76,0.25);
+}
+
+.form-control::placeholder {
+    color: var(--tos-text-muted);
+}
+
+.form-label {
+    font-family: 'Cinzel', serif;
+    color: var(--tos-text-heading);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+}
+
+/* --- Cards --- */
+.card {
+    background-color: var(--tos-surface);
+    border: 1px solid var(--tos-border);
+    color: var(--tos-text);
+    box-shadow: var(--tos-shadow);
+}
+
+.card-header {
+    background-color: var(--tos-surface-3);
+    border-bottom: 1px solid var(--tos-border-glow);
+    font-family: 'Cinzel', serif;
+    color: var(--tos-gold);
+    letter-spacing: 0.08em;
+}
+
+.card-title {
+    font-family: 'Cinzel', serif;
+    color: var(--tos-gold-light);
+}
+
+/* --- Tables --- */
+.table {
+    color: var(--tos-text);
+}
+
+.table thead th {
+    background-color: var(--tos-surface-3);
+    color: var(--tos-gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    border-color: var(--tos-border);
+    text-transform: uppercase;
+}
+
+.table tbody tr {
+    border-color: var(--tos-border);
+}
+
+.table tbody tr:hover {
+    background-color: var(--tos-surface-2);
+}
+
+.table td, .table th {
+    border-color: var(--tos-border);
+    vertical-align: middle;
+}
+
+.table-bordered {
+    border-color: var(--tos-border);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255,255,255,0.025);
+    color: var(--tos-text);
+}
+
+/* --- Alerts --- */
+.alert {
+    border-radius: 0.4rem;
+}
+
+.alert-info {
+    background-color: rgba(26,26,78,0.6);
+    border-color: var(--tos-border-glow);
+    color: var(--tos-text);
+}
+
+.alert-warning {
+    background-color: rgba(61,58,26,0.6);
+    border-color: #7a6a1a;
+    color: var(--tos-text-heading);
+}
+
+.alert-danger {
+    background-color: rgba(139,26,26,0.4);
+    border-color: var(--tos-red-light);
+    color: #f5a0a0;
+}
+
+.alert-success {
+    background-color: rgba(46,92,46,0.4);
+    border-color: var(--tos-town-light);
+    color: #a0f5a0;
+}
+
+/* --- Badges --- */
+.badge.bg-success   { background-color: var(--tos-town)    !important; }
+.badge.bg-danger    { background-color: var(--tos-red)     !important; }
+.badge.bg-secondary { background-color: var(--tos-surface-3) !important; color: var(--tos-text) !important; }
+.badge.bg-info      { background-color: #1a4a5e !important; }
+.badge.bg-warning   { background-color: var(--tos-neutral) !important; color: var(--tos-neutral-light) !important; }
+.badge.bg-dark      { background-color: var(--tos-coven)   !important; }
+.badge.bg-primary   { background-color: var(--tos-mafia)   !important; }
+.badge.bg-light     { background-color: var(--tos-surface-2) !important; color: var(--tos-text) !important; }
+.badge.bg-purple    { background-color: #4a1a6e !important; }
+
+/* --- Content padding --- */
 .content {
     padding-top: 1.1rem;
 }
 
+/* --- Page headings --- */
+h3 {
+    border-bottom: 1px solid var(--tos-border-glow);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1.2rem;
+}
+
+/* --- Validation --- */
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: 1px solid var(--tos-town-light);
 }
 
 .invalid {
-    outline: 1px solid red;
+    outline: 1px solid var(--tos-red-light);
 }
 
 .validation-message {
-    color: red;
+    color: #f5a0a0;
 }
 
+/* --- Blazor error --- */
 #blazor-error-ui {
-    color-scheme: light only;
-    background: lightyellow;
+    color-scheme: dark only;
+    background: #2a0a0a;
+    color: #f5a0a0;
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.6);
     box-sizing: border-box;
     display: none;
     left: 0;
@@ -48,6 +289,7 @@ a, .btn-link {
     position: fixed;
     width: 100%;
     z-index: 1000;
+    border-top: 1px solid var(--tos-red-light);
 }
 
     #blazor-error-ui .dismiss {
@@ -58,15 +300,16 @@ a, .btn-link {
     }
 
 .blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #3a0a0a;
     padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
+    color: #f5a0a0;
 }
 
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
 
+/* --- Loading --- */
 .loading-progress {
     position: relative;
     display: block;
@@ -77,14 +320,14 @@ a, .btn-link {
 
     .loading-progress circle {
         fill: none;
-        stroke: #e0e0e0;
+        stroke: var(--tos-surface-3);
         stroke-width: 0.6rem;
         transform-origin: 50% 50%;
         transform: rotate(-90deg);
     }
 
         .loading-progress circle:last-child {
-            stroke: #1b6ec2;
+            stroke: var(--tos-gold);
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
             transition: stroke-dasharray 0.05s ease-in-out;
         }
@@ -94,6 +337,8 @@ a, .btn-link {
     text-align: center;
     font-weight: bold;
     inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+    color: var(--tos-gold);
+    font-family: 'Cinzel', serif;
 }
 
     .loading-progress-text:after {
@@ -101,11 +346,14 @@ a, .btn-link {
     }
 
 code {
-    color: #c02d76;
+    color: var(--tos-gold-light);
+    background-color: var(--tos-surface-2);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-    color: var(--bs-secondary-color);
+    color: var(--tos-text-muted);
     text-align: end;
 }
 
@@ -113,7 +361,251 @@ code {
     text-align: start;
 }
 
-/* Responsive table → card layout for mobile */
+/* ========================================================
+   Role Cards — Player Assignment Grid
+   ======================================================== */
+
+.role-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+    padding: 0.5rem 0;
+}
+
+.role-card {
+    background: linear-gradient(160deg, var(--tos-surface-2) 0%, var(--tos-surface) 100%);
+    border: 1px solid var(--tos-border);
+    border-radius: 0.6rem;
+    box-shadow: var(--tos-shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+}
+
+.role-card:hover {
+    box-shadow: var(--tos-shadow), var(--tos-glow);
+    transform: translateY(-2px);
+}
+
+.role-card.faction-town {
+    border-color: var(--tos-town-light);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 8px rgba(76,175,80,0.2);
+}
+
+.role-card.faction-mafia {
+    border-color: var(--tos-mafia-light);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 8px rgba(57,73,171,0.3);
+}
+
+.role-card.faction-neutral {
+    border-color: var(--tos-neutral-light);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 8px rgba(192,176,76,0.2);
+}
+
+.role-card.faction-coven {
+    border-color: var(--tos-coven-light);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 8px rgba(156,39,176,0.3);
+}
+
+.role-card.state-dead {
+    opacity: 0.55;
+    filter: grayscale(60%);
+}
+
+.role-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--tos-border);
+    background-color: rgba(0,0,0,0.3);
+}
+
+.role-card-player {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tos-text-heading);
+    letter-spacing: 0.04em;
+}
+
+.role-card-faction-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.2em 0.6em;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+
+.faction-town    .role-card-faction-badge { background-color: var(--tos-town);   color: #a0f0a0; }
+.faction-mafia   .role-card-faction-badge { background-color: var(--tos-mafia);  color: #a0a8f0; }
+.faction-neutral .role-card-faction-badge { background-color: var(--tos-neutral); color: var(--tos-neutral-light); }
+.faction-coven   .role-card-faction-badge { background-color: var(--tos-coven);  color: #e0a0f5; }
+
+.role-card-body {
+    padding: 0.7rem 0.9rem 0.5rem;
+}
+
+.role-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    margin-bottom: 0.2rem;
+}
+
+.role-card-desc {
+    font-size: 0.88rem;
+    color: var(--tos-text-muted);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.role-card-states {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+    min-height: 1.5rem;
+}
+
+.role-card-actions {
+    padding: 0.5rem 0.9rem 0.7rem;
+    border-top: 1px solid var(--tos-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+/* ========================================================
+   Player Role Reveal Card (non-manager view)
+   ======================================================== */
+
+.role-reveal-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    padding: 2rem 1rem;
+}
+
+.role-reveal-card {
+    position: relative;
+    width: min(420px, 100%);
+    background: linear-gradient(160deg, var(--tos-surface-2) 0%, var(--tos-surface) 100%);
+    border: 2px solid var(--tos-border-glow);
+    border-radius: 1rem;
+    box-shadow: var(--tos-shadow), 0 0 40px rgba(201,168,76,0.15);
+    overflow: hidden;
+    text-align: center;
+}
+
+.role-reveal-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.role-reveal-top {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.role-reveal-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--tos-gold);
+    margin-bottom: 0.6rem;
+}
+
+.role-reveal-icon {
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+}
+
+.role-reveal-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 20px rgba(201,168,76,0.5);
+    margin-bottom: 0.2rem;
+}
+
+.role-reveal-faction {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25em 0.9em;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 0.8rem;
+}
+
+.role-reveal-faction.faction-town    { background: var(--tos-town);    color: #a0f0a0; }
+.role-reveal-faction.faction-mafia   { background: var(--tos-mafia);   color: #a0a8f0; }
+.role-reveal-faction.faction-neutral { background: var(--tos-neutral); color: var(--tos-neutral-light); }
+.role-reveal-faction.faction-coven   { background: var(--tos-coven);   color: #e0a0f5; }
+
+.role-reveal-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--tos-border-glow), transparent);
+    margin: 0.2rem 1.5rem 0.8rem;
+}
+
+.role-reveal-desc {
+    padding: 0 1.5rem 1rem;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--tos-text);
+    line-height: 1.6;
+}
+
+.role-reveal-states {
+    padding: 0.5rem 1.5rem 1.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+}
+
+/* ========================================================
+   Section title / panel header
+   ======================================================== */
+
+.tos-panel {
+    background: var(--tos-surface);
+    border: 1px solid var(--tos-border);
+    border-radius: 0.5rem;
+    padding: 1.2rem 1.4rem;
+    box-shadow: var(--tos-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.tos-panel-title {
+    font-family: 'Cinzel', serif;
+    color: var(--tos-gold);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--tos-border);
+    padding-bottom: 0.4rem;
+}
+
+/* ========================================================
+   Responsive table → card layout for mobile
+   ======================================================== */
 @media (max-width: 640.98px) {
     .table-responsive-cards thead {
         display: none;
@@ -121,12 +613,12 @@ code {
 
     .table-responsive-cards tbody tr {
         display: block;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--tos-border);
         border-radius: 0.5rem;
         margin-bottom: 1rem;
         padding: 0.75rem;
-        background: #fff;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        background: var(--tos-surface-2);
+        box-shadow: 0 1px 8px rgba(0,0,0,0.4);
     }
 
     .table-responsive-cards tbody td {
@@ -135,7 +627,7 @@ code {
         align-items: center;
         padding: 0.3rem 0;
         border: none;
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid var(--tos-border);
         font-size: 0.9rem;
     }
 
@@ -148,9 +640,13 @@ code {
     .table-responsive-cards tbody td::before {
         content: attr(data-label);
         font-weight: 600;
-        color: #555;
+        font-family: 'Cinzel', serif;
+        color: var(--tos-gold);
         margin-right: 0.5rem;
         flex-shrink: 0;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
 }
 }

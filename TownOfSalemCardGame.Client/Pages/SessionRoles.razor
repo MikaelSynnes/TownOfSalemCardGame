@@ -6,56 +6,52 @@
 @inject IJSRuntime JS
 
 <h3>@(SessionState.IsManager ? "Session Overview" : "Your Role")</h3>
+
 @if (SessionState.PlayerAssignments == null || SessionState.PlayerAssignments.Count == 0)
 {
     <div class="alert alert-warning">No assignments to display.</div>
 }
 else if (SessionState.IsManager)
 {
-    <div class="table-responsive">
-        <table class="table table-bordered table-responsive-cards mt-2">
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th>Role</th>
-                    <th>Description</th>
-                    <th>States</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var assignment in SessionState.PlayerAssignments)
-                {
-                    <tr>
-                        <td data-label="Player">@assignment.Player</td>
-                        <td data-label="Role">@assignment.Role?.Name</td>
-                        <td data-label="Description">@assignment.Role?.Description</td>
-                        <td data-label="States">
-                            @if (assignment.States != null && assignment.States.Count > 0)
+    <div class="role-cards-grid">
+        @foreach (var assignment in SessionState.PlayerAssignments)
+        {
+            var faction = GetFaction(assignment.Role?.Name);
+            var isDead = assignment.States != null && assignment.States.Contains("Dead");
+            <div class="role-card faction-@faction @(isDead ? "state-dead" : "")">
+                <div class="role-card-header">
+                    <span class="role-card-player">@assignment.Player</span>
+                    <span class="role-card-faction-badge">@faction</span>
+                </div>
+                <div class="role-card-body">
+                    <div class="role-card-name">@(assignment.Role?.Name ?? "Unknown")</div>
+                    <div class="role-card-desc">@assignment.Role?.Description</div>
+                    <div class="role-card-states">
+                        @if (assignment.States != null && assignment.States.Count > 0)
+                        {
+                            @foreach (var state in assignment.States)
                             {
-                                @foreach (var state in assignment.States)
-                                {
-                                    var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                                    <span class="badge bg-@color me-1">@state</span>
-                                }
+                                var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
+                                <span class="badge bg-@color">@state</span>
                             }
-                            else
-                            {
-                                <span class="text-muted">None</span>
-                            }
-                        </td>
-                        <td data-label="Actions">
-                            <div class="d-flex flex-wrap gap-1">
-                                @foreach (var (state, color) in StateOptions)
-                                {
-                                    <button class="btn btn-sm @(assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)" @onclick="() => ToggleState(assignment, state)">@state</button>
-                                }
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        }
+                        else
+                        {
+                            <span style="color:var(--tos-text-muted);font-size:0.8rem;">No states</span>
+                        }
+                    </div>
+                </div>
+                <div class="role-card-actions">
+                    @foreach (var (state, color) in StateOptions)
+                    {
+                        <button class="btn btn-sm @(assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)"
+                                @onclick="() => ToggleState(assignment, state)">
+                            @state
+                        </button>
+                    }
+                </div>
+            </div>
+        }
     </div>
 }
 else
@@ -67,18 +63,25 @@ else
     }
     else
     {
-        <div class="card border-info mt-4 shadow-sm" style="max-width: 480px;">
-            <div class="card-header bg-info text-white fw-bold">Your Role</div>
-            <div class="card-body">
-                <h4 class="card-title">@myAssignment.Role?.Name</h4>
-                <p class="card-text">@myAssignment.Role?.Description</p>
+        var faction = GetFaction(myAssignment.Role?.Name);
+        var roleIcon = GetRoleIcon(myAssignment.Role?.Name);
+        <div class="role-reveal-wrap">
+            <div class="role-reveal-card faction-@faction">
+                <div class="role-reveal-top">
+                    <div class="role-reveal-label">Your Role Has Been Revealed</div>
+                    <div class="role-reveal-icon">@roleIcon</div>
+                    <div class="role-reveal-name">@myAssignment.Role?.Name</div>
+                    <span class="role-reveal-faction faction-@faction">@faction</span>
+                </div>
+                <hr class="role-reveal-divider" />
+                <div class="role-reveal-desc">@myAssignment.Role?.Description</div>
                 @if (myAssignment.States != null && myAssignment.States.Count > 0)
                 {
-                    <div class="mt-2">
+                    <div class="role-reveal-states">
                         @foreach (var state in myAssignment.States)
                         {
                             var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                            <span class="badge bg-@color me-1">@state</span>
+                            <span class="badge bg-@color">@state</span>
                         }
                     </div>
                 }
@@ -89,6 +92,7 @@ else
 
 @code {
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
     private static readonly (string State, string Color)[] StateOptions = new[] {
         ("Alive", "success"),
         ("Dead", "danger"),
@@ -97,9 +101,75 @@ else
         ("Saved", "warning")
     };
 
+    private static readonly HashSet<string> TownRoleNames = new()
+    {
+        "Citizen", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
+        "Vigilante", "Veteran", "Medium", "Retributionist", "Transporter", "Jailor",
+        "Tracker", "Lookout", "Spy", "Crusader", "Psychic", "Trap Master", "Coroner"
+    };
+
+    private static readonly HashSet<string> MafiaRoleNames = new()
+    {
+        "Mafia", "Godfather", "Consigliere", "Blackmailer", "Consort", "Framer",
+        "Disguiser", "Forger", "Janitor", "Hypnotist", "Ambusher"
+    };
+
+    private static readonly HashSet<string> CovenRoleNames = new()
+    {
+        "Coven Leader", "Medusa", "Necromancer", "Hex Master", "Potion Master", "Poisoner"
+    };
+
+    private static string GetFaction(string? roleName)
+    {
+        if (roleName == null) return "neutral";
+        if (TownRoleNames.Contains(roleName)) return "town";
+        if (MafiaRoleNames.Contains(roleName)) return "mafia";
+        if (CovenRoleNames.Contains(roleName)) return "coven";
+        return "neutral";
+    }
+
+    private static string GetRoleIcon(string? roleName) => roleName switch
+    {
+        "Sheriff" or "Investigator" => "🔍",
+        "Doctor" => "🩺",
+        "Escort" => "💃",
+        "Mayor" => "🏛️",
+        "Bodyguard" => "🛡️",
+        "Vigilante" => "🔫",
+        "Veteran" => "⚔️",
+        "Medium" => "🔮",
+        "Retributionist" => "☀️",
+        "Jailor" => "🔒",
+        "Transporter" => "🔄",
+        "Tracker" or "Lookout" => "👁️",
+        "Spy" => "🕵️",
+        "Crusader" => "✝️",
+        "Psychic" => "🌙",
+        "Godfather" => "🌹",
+        "Mafia" or "Consigliere" or "Consort" or "Blackmailer" => "🔪",
+        "Framer" => "🖼️",
+        "Disguiser" => "🎭",
+        "Forger" => "📜",
+        "Janitor" => "🧹",
+        "Serial Killer" => "🔪",
+        "Arsonist" => "🔥",
+        "Witch" => "🧙",
+        "Jester" => "🃏",
+        "Executioner" => "⚖️",
+        "Amnesiac" => "❓",
+        "Guardian Angel" => "😇",
+        "Survivor" => "💫",
+        "Coven Leader" => "📖",
+        "Medusa" => "🐍",
+        "Necromancer" => "💀",
+        "Hex Master" => "🌀",
+        "Potion Master" => "⚗️",
+        "Poisoner" => "☠️",
+        _ => "🂠"
+    };
+
     protected override async Task OnInitializedAsync()
     {
-        // Restore sessionId from query string if present
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
         var sessionId = query["sessionId"];
@@ -112,7 +182,6 @@ else
             }
             else
             {
-                // Try to force refresh from the server in case assignments are not yet set
                 var session = await Http.GetFromJsonAsync<Session>($"api/session/{sessionId}");
                 if (session != null && session.Assignments != null && session.Assignments.Count > 0)
                 {
@@ -124,7 +193,6 @@ else
                 }
             }
         }
-        // Set Alive by default for all assignments that have no state
         if (SessionState.PlayerAssignments != null)
         {
             foreach (var assignment in SessionState.PlayerAssignments)

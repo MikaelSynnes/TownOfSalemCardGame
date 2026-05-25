@@ -166,12 +166,12 @@ else
                 if (session.IsStarted)
                 {
                     // Pass sessionId as query parameter to session-roles
-                    NavigationManager.NavigateTo($"/session-roles?sessionId={session.SessionId}", true);
+                    NavigationManager.NavigateTo($"/session-roles?sessionId={session.SessionId}");
                 }
                 else
                 {
                     // Pass sessionId as query parameter to create-session
-                    NavigationManager.NavigateTo($"/create-session?sessionId={session.SessionId}", true);
+                    NavigationManager.NavigateTo($"/create-session?sessionId={session.SessionId}");
                 }
                 return;
             }
@@ -180,12 +180,25 @@ else
         var response = await Http.PostAsJsonAsync("api/session/join", joinRequest);
         if (response.IsSuccessStatusCode)
         {
+            var session = await response.Content.ReadFromJsonAsync<Session>();
             Joined = true;
             Error = null;
             SessionState.IsManager = false;
             SessionState.Username = joinRequest.Username;
             await SaveCurrentSession();
             await StartSignalR();
+
+            // If game is already started, restore the player's role from existing assignments
+            if (session != null && session.IsStarted && session.Assignments != null)
+            {
+                var existing = session.Assignments.FirstOrDefault(a => a.Player == joinRequest.Username);
+                if (existing?.Role != null)
+                {
+                    RoleName = existing.Role.Name;
+                    RoleDescription = existing.Role.Description;
+                    StateHasChanged();
+                }
+            }
         }
         else
         {

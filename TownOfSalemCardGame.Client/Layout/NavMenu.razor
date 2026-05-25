@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Components.Routing
-@inject IJSRuntime JS
 @inject NavigationManager Navigation
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -23,38 +22,12 @@
                 <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> Join Session
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <button class="btn btn-outline-light w-100" @onclick:stopPropagation @onclick="JoinExistingGameFromCookie">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Join Existing Game
-            </button>
-            @if (!string.IsNullOrEmpty(joinError))
-            {
-                <div class="text-danger mt-2">@joinError</div>
-            }
-        </div>
-    </nav>
+        </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-    private string joinError;
-
     private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
     private void CollapseNavMenu() => collapseNavMenu = true;
-
-    private async Task JoinExistingGameFromCookie()
-    {
-        joinError = null;
-        var sessionId = await JS.InvokeAsync<string>("sessionCookie.get", "PlayerSessionId");
-        var username = await JS.InvokeAsync<string>("sessionCookie.get", "PlayerUsername");
-        if (!string.IsNullOrEmpty(sessionId) && !string.IsNullOrEmpty(username))
-        {
-            Navigation.NavigateTo($"/join-session?sessionId={sessionId}&username={username}", forceLoad: true);
-        }
-        else
-        {
-            joinError = "No existing game session found in your browser.";
-        }
-    }
 }
