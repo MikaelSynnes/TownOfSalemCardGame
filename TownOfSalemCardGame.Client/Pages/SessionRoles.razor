@@ -51,7 +51,7 @@ else if (SessionState.IsManager)
                       States="@a.States"
                       Classic="true">
                 <ActionContent>
-                    @foreach (var (state, color) in StateOptions)
+                    @foreach (var (state, color) in GetStateOptionsForRole(a, SessionState.PlayerAssignments))
                     {
                         var s = state; var c = color;
                         <button class="btn btn-sm @(a.States.Contains(s) ? $"btn-{c}" : "btn-outline-" + c)"
@@ -88,13 +88,82 @@ else
 @code {
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    private static readonly (string State, string Color)[] StateOptions = new[] {
+    // Base states every player can have regardless of roles in game
+    private static readonly (string State, string Color)[] BaseStateOptions = new[]
+    {
         ("Alive", "success"),
-        ("Dead", "danger"),
-        ("Muted", "secondary"),
-        ("Protected", "info"),
-        ("Saved", "warning")
+        ("Dead",  "danger"),
     };
+
+    // States that are only relevant when a specific role exists anywhere in the session
+    private static readonly (string RequiredRole, string State, string Color)[] RoleGatedStates = new[]
+    {
+        // Muted — caused by Blackmailer or Jailor
+        ("Blackmailer",    "Muted",         "secondary"),
+        ("Jailor",         "Muted",         "secondary"),
+        // Protected — caused by any protective role
+        ("Doctor",         "Protected",     "info"),
+        ("Bodyguard",      "Protected",     "info"),
+        ("Crusader",       "Protected",     "info"),
+        ("Guardian Angel", "Protected",     "info"),
+        ("Trap Master",    "Protected",     "info"),
+        ("Survivor",       "Protected",     "info"),
+        // Saved — caused by Doctor, Bodyguard or Guardian Angel actually preventing death
+        ("Doctor",         "Saved",         "warning"),
+        ("Bodyguard",      "Saved",         "warning"),
+        ("Guardian Angel", "Saved",         "warning"),
+        // Role-specific states
+        ("Veteran",        "On Alert",      "warning"),
+        ("Arsonist",       "Doused",        "danger"),
+        ("Poisoner",       "Poisoned",      "danger"),
+        ("Plaguebearer",   "Infected",      "warning"),
+        ("Hex Master",     "Hexed",         "secondary"),
+        ("Jailor",         "Jailed",        "secondary"),
+        ("Hypnotist",      "Hypnotized",    "secondary"),
+        ("Transporter",    "Transported",   "info"),
+        ("Framer",         "Framed",        "warning"),
+        ("Disguiser",      "Disguised",     "secondary"),
+        ("Witch",          "Controlled",    "secondary"),
+        ("Coven Leader",   "Controlled",    "secondary"),
+        ("Retributionist", "Resurrected",   "info"),
+        ("Necromancer",    "Resurrected",   "info"),
+        ("Mayor",          "Revealed",      "warning"),
+        ("Executioner",    "Target",        "danger"),
+        ("Guardian Angel", "GA Target",     "info"),
+        ("Survivor",       "Vested",        "success"),
+        ("Crusader",       "Crusading",     "info"),
+        ("Medusa",         "Stoned",        "secondary"),
+        ("Trap Master",    "Trapped",       "warning"),
+        ("Pirate",         "Plundered",     "warning"),
+        ("Amnesiac",       "Remembered",    "info"),
+        ("Spy",            "Bugged",        "secondary"),
+        ("Lookout",        "Watched",       "info"),
+        ("Tracker",        "Tracked",       "info"),
+    };
+
+    private static IEnumerable<(string State, string Color)> GetStateOptionsForRole(
+        PlayerRoleAssignment assignment,
+        List<PlayerRoleAssignment>? allAssignments)
+    {
+        // Always show base states
+        foreach (var opt in BaseStateOptions)
+            yield return opt;
+
+        if (allAssignments == null) yield break;
+
+        var rolesInGame = allAssignments
+            .Where(a => a.Role != null)
+            .Select(a => a.Role!.Name)
+            .ToHashSet();
+
+        var seen = new HashSet<string>();
+        foreach (var (requiredRole, state, color) in RoleGatedStates)
+        {
+            if (!rolesInGame.Contains(requiredRole)) continue;
+            if (!seen.Add(state)) continue;   // avoid duplicate buttons when 2 roles grant same state
+            yield return (state, color);
+        }
+    }
 
     private static readonly HashSet<string> TownRoleNames = new()
     {
