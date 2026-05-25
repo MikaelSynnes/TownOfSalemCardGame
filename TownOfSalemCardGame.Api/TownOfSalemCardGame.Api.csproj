@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\TownOfSalemCardGame.Shared\TownOfSalemCardGame.Shared.csproj" />
+        <ProjectReference Include="..\TownOfSalemCardGame.Client\TownOfSalemCardGame.Client.csproj" />
     </ItemGroup>
 
 </Project>
