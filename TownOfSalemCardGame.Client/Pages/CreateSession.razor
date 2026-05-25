@@ -99,6 +99,8 @@ else
                             <th>Player</th>
                             <th>Role</th>
                             <th>Description</th>
+                            <th>States</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,6 +110,28 @@ else
                                 <td data-label="Player">@assignment.Player</td>
                                 <td data-label="Role">@assignment.Role?.Name</td>
                                 <td data-label="Description">@assignment.Role?.Description</td>
+                                <td data-label="States">
+                                    @if (assignment.States != null && assignment.States.Count > 0)
+                                    {
+                                        @foreach (var state in assignment.States)
+                                        {
+                                            var color = AdminStateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
+                                            <span class="badge bg-@color me-1">@state</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">None</span>
+                                    }
+                                </td>
+                                <td data-label="Actions">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var (state, color) in AdminStateOptions)
+                                        {
+                                            <button class="btn btn-sm @(assignment.States != null && assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)" @onclick="() => AdminToggleState(assignment, state)">@state</button>
+                                        }
+                                    </div>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -126,14 +150,57 @@ else
     // Role selection for manager
     private List<RoleInfo> AvailableRoles = new()
     {
-        new RoleInfo { Name = "Mafia", Description = "A member of the mafia. Eliminate citizens and avoid detection.", Count = 0 },
+        // Town
         new RoleInfo { Name = "Citizen", Description = "An innocent citizen. Find and vote out the mafia.", Count = 0 },
-        new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine their role.", Count = 0 },
+        new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine if they are suspicious.", Count = 0 },
+        new RoleInfo { Name = "Doctor", Description = "Can heal one player each night, preventing them from dying.", Count = 0 },
+        new RoleInfo { Name = "Investigator", Description = "Can investigate one player per night and receive a clue about their role.", Count = 0 },
+        new RoleInfo { Name = "Escort", Description = "Can distract one player each night, preventing them from using their ability.", Count = 0 },
+        new RoleInfo { Name = "Mayor", Description = "Can reveal themselves to receive three votes during the day.", Count = 0 },
+        new RoleInfo { Name = "Bodyguard", Description = "Can protect one player each night, killing any attacker who targets them.", Count = 0 },
+        new RoleInfo { Name = "Vigilante", Description = "Can shoot and kill one player each night, but feels guilt for killing town members.", Count = 0 },
+        new RoleInfo { Name = "Veteran", Description = "Can go on alert at night, killing anyone who visits them.", Count = 0 },
+        new RoleInfo { Name = "Medium", Description = "Can speak with the dead at night and relay messages to the living.", Count = 0 },
+        new RoleInfo { Name = "Retributionist", Description = "Can resurrect one dead Town member to use their ability once.", Count = 0 },
+        new RoleInfo { Name = "Transporter", Description = "Can swap two players' positions at night, redirecting all actions between them.", Count = 0 },
+        new RoleInfo { Name = "Jailor", Description = "Can jail a player at night, preventing all actions on or by them, and may execute them.", Count = 0 },
+        new RoleInfo { Name = "Tracker", Description = "Can track one player to see who they visited last night.", Count = 0 },
+        new RoleInfo { Name = "Lookout", Description = "Can watch a player to see who visited them last night.", Count = 0 },
+        new RoleInfo { Name = "Spy", Description = "Can bug a player to hear all Mafia chat and see who visited them.", Count = 0 },
+        new RoleInfo { Name = "Crusader", Description = "Can protect a player and attack one of their visitors each night.", Count = 0 },
+        new RoleInfo { Name = "Psychic", Description = "Receives visions at night revealing groups of innocent or evil players.", Count = 0 },
+        new RoleInfo { Name = "Trap Master", Description = "Can place a trap on a player that kills and reveals any evil visitor.", Count = 0 },
+        new RoleInfo { Name = "Coroner", Description = "Can examine a dead body at night to learn who visited them when they died.", Count = 0 },
+        // Mafia
+        new RoleInfo { Name = "Mafia", Description = "A member of the mafia. Eliminate citizens and avoid detection.", Count = 0 },
+        new RoleInfo { Name = "Godfather", Description = "The leader of the Mafia. Appears innocent to investigations and orders the nightly kill.", Count = 0 },
+        new RoleInfo { Name = "Consigliere", Description = "Can investigate a player at night to learn their exact role.", Count = 0 },
+        new RoleInfo { Name = "Blackmailer", Description = "Can silence one player each night, preventing them from speaking during the day.", Count = 0 },
+        new RoleInfo { Name = "Consort", Description = "Can distract one player each night, preventing them from using their ability.", Count = 0 },
+        new RoleInfo { Name = "Framer", Description = "Can frame a player at night, making them appear suspicious to investigators.", Count = 0 },
+        new RoleInfo { Name = "Disguiser", Description = "Can disguise themselves as a Town member, making investigators think they are that player.", Count = 0 },
+        new RoleInfo { Name = "Forger", Description = "Can forge a player's last will at night, replacing their final message.", Count = 0 },
+        new RoleInfo { Name = "Janitor", Description = "Can clean a dead body at night, hiding the victim's role and last will from the town.", Count = 0 },
+        new RoleInfo { Name = "Hypnotist", Description = "Can give a player a false feedback message at night to mislead them.", Count = 0 },
+        new RoleInfo { Name = "Ambusher", Description = "Can ambush a player's house, killing one of their visitors and revealing the ambush.", Count = 0 },
+        // Neutral
         new RoleInfo { Name = "Serial Killer", Description = "A lone killer who eliminates one player each night. Wins alone.", Count = 0 },
+        new RoleInfo { Name = "Arsonist", Description = "Can douse players in gasoline and ignite them all at once. Wins alone.", Count = 0 },
         new RoleInfo { Name = "Witch", Description = "Can control a player each night, forcing them to target another.", Count = 0 },
-        new RoleInfo { Name = "Hateful Citizen", Description = "A citizen who wins if lynched by the town.", Count = 0 },
-        new RoleInfo { Name = "Peaceful Citizen", Description = "A citizen who cannot vote to lynch and wins with the town.", Count = 0 },
-        new RoleInfo { Name = "Medic", Description = "Can protect one player from death each night.", Count = 0 }
+        new RoleInfo { Name = "Jester", Description = "Wins by getting lynched by the town during the day.", Count = 0 },
+        new RoleInfo { Name = "Executioner", Description = "Has a target and wins by getting that specific player lynched by the town.", Count = 0 },
+        new RoleInfo { Name = "Amnesiac", Description = "Has forgotten their role and can remember a dead player's role to become it.", Count = 0 },
+        new RoleInfo { Name = "Guardian Angel", Description = "Has a target they protect. Wins if their target survives to the end of the game.", Count = 0 },
+        new RoleInfo { Name = "Pirate", Description = "Plunders players to steal their items and wins by successfully plundering twice.", Count = 0 },
+        new RoleInfo { Name = "Plaguebearer", Description = "Infects all players and becomes Pestilence, a nearly unstoppable killing force.", Count = 0 },
+        new RoleInfo { Name = "Survivor", Description = "Has no special ability, but wins by simply surviving to the end of the game.", Count = 0 },
+        // Coven
+        new RoleInfo { Name = "Coven Leader", Description = "The leader of the Coven. Can control a player and, with the Necronomicon, kill them.", Count = 0 },
+        new RoleInfo { Name = "Medusa", Description = "Can stone gaze all visitors to her house, killing them. With Necronomicon, can petrify from afar.", Count = 0 },
+        new RoleInfo { Name = "Necromancer", Description = "Can use the ability of a dead player to target someone each night.", Count = 0 },
+        new RoleInfo { Name = "Hex Master", Description = "Can hex all players; when all living players are hexed, they all die simultaneously.", Count = 0 },
+        new RoleInfo { Name = "Potion Master", Description = "Has three potions: heal, reveal role, and kill. Can use one per night.", Count = 0 },
+        new RoleInfo { Name = "Poisoner", Description = "Can poison a player, causing them to die the following night unless healed.", Count = 0 },
     };
 
     // Holds player-role assignments for the manager
@@ -223,7 +290,7 @@ else
                         Name = roleObj.GetProperty("name").GetString() ?? string.Empty,
                         Description = roleObj.GetProperty("description").GetString() ?? string.Empty
                     };
-                    assignments.Add(new PlayerRoleAssignment { Player = player, Role = role });
+                    assignments.Add(new PlayerRoleAssignment { Player = player, Role = role, States = new HashSet<string> { "Alive" } });
                 }
             }
             SessionState.PlayerAssignments = assignments;
@@ -323,5 +390,42 @@ else
             if (role.Name != "Citizen")
                 AutoAdjustCitizens();
         }
+    }
+
+    private static readonly (string State, string Color)[] AdminStateOptions = new[]
+    {
+        ("Alive", "success"),
+        ("Dead", "danger"),
+        ("Muted", "secondary"),
+        ("Protected", "info"),
+        ("Saved", "warning"),
+        ("Doused", "warning"),
+        ("Hexed", "purple"),
+        ("Poisoned", "dark"),
+        ("Jailed", "primary"),
+        ("Cleaned", "light")
+    };
+
+    private void AdminToggleState(PlayerRoleAssignment assignment, string state)
+    {
+        if (assignment.States == null)
+            assignment.States = new HashSet<string>();
+        if (state == "Alive")
+        {
+            assignment.States.Remove("Dead");
+            assignment.States.Add("Alive");
+        }
+        else if (state == "Dead")
+        {
+            assignment.States.Remove("Alive");
+            assignment.States.Add("Dead");
+        }
+        else
+        {
+            if (!assignment.States.Remove(state))
+                assignment.States.Add(state);
+        }
+        assignment.States = new HashSet<string>(assignment.States);
+        StateHasChanged();
     }
 }
