@@ -1344,4 +1344,123 @@ code {
     font-style: italic;
     white-space: nowrap;
 }
+
+/* ========================================================
+   Admin Chat Panel (Session Overview) & Player Message Box
+   ======================================================== */
+
+.tc-admin-send-panel {
+    background: rgba(10, 8, 20, 0.72);
+    border: 1px solid var(--tos-border-glow);
+    border-radius: 10px;
+    padding: 1.1rem 1.4rem 1rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+}
+
+.tc-admin-send-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tc-admin-send-select {
+    flex: 0 0 auto;
+    min-width: 180px;
+    background: var(--tos-surface-3);
+    color: var(--tos-text);
+    border: 1px solid var(--tos-border);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+    font-family: inherit;
+}
+
+.tc-admin-send-input {
+    flex: 1 1 200px;
+    background: var(--tos-surface-3);
+    color: var(--tos-text);
+    border: 1px solid var(--tos-border);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.tc-admin-send-input:focus {
+    border-color: var(--tos-gold);
+}
+
+.tc-admin-send-btn {
+    flex: 0 0 auto;
+    padding: 0.4rem 1.1rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #c9a84c 0%, #8b6914 100%);
+    color: #0e0c0a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.15s;
+}
+
+.tc-admin-send-btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+}
+
+.tc-admin-send-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+}
+
+/* Sent message log (admin side) and received list (player side) */
+.tc-admin-chat-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.tc-admin-chat-msg {
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--tos-gold);
+    border-radius: 5px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.88rem;
+    color: var(--tos-text);
+}
+
+.tc-admin-chat-target {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    margin-right: 0.4rem;
+}
+
+/* Player-side received messages box */
+.tc-admin-chat-box {
+    background: rgba(10, 8, 20, 0.65);
+    border: 1px solid var(--tos-border-glow);
+    border-radius: 8px;
+    padding: 0.85rem 1rem 0.75rem;
+}
+
+.tc-admin-chat-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    margin-bottom: 0.5rem;
+}
 }

@@ -67,6 +67,7 @@ else
         // new RoleInfo { Name = "Psychic", Description = "Receives visions at night revealing groups of innocent or evil players.", Count = 0 },
         new RoleInfo { Name = "Trap Master", Description = "Can place a trap on a player that kills and reveals any evil visitor.", Count = 0 },
         new RoleInfo { Name = "Coroner", Description = "Can examine a dead body at night to learn who visited them when they died.", Count = 0 },
+        new RoleInfo { Name = "Fool", Description = "Appears suspicious to everyone but is actually harmless.", Count = 0 },
         // Mafia
         new RoleInfo { Name = "Mafia", Description = "A member of the mafia. Eliminate citizens and avoid detection.", Count = 0 },
         new RoleInfo { Name = "Godfather", Description = "The leader of the Mafia. Appears innocent to investigations and orders the nightly kill.", Count = 0 },
@@ -88,6 +89,7 @@ else
         // new RoleInfo { Name = "Amnesiac", Description = "Has forgotten their role and can remember a dead player's role to become it.", Count = 0 },
         new RoleInfo { Name = "Guardian Angel", Description = "Has a target they protect. Wins if their target survives to the end of the game.", Count = 0 },
         new RoleInfo { Name = "Survivor", Description = "Has no special ability, but wins by simply surviving to the end of the game.", Count = 0 },
+        new RoleInfo { Name = "Hunter", Description = "If killed at night, immediately shoots one of their attackers.", Count = 0 },
         // Coven
         // new RoleInfo { Name = "Potion Master", Description = "Has three potions: heal, reveal role, and kill. Can use one per night.", Count = 0 },
         // new RoleInfo { Name = "Poisoner", Description = "Can poison a player, causing them to die the following night unless healed.", Count = 0 },
@@ -191,7 +193,7 @@ else
             }
             SessionState.PlayerAssignments = assignments;
             StateHasChanged();
-            NavigationManager.NavigateTo("/session-roles", false);
+            NavigationManager.NavigateTo($"/session-roles?sessionId={SessionId}", false);
         });
         await hubConnection.StartAsync();
         await hubConnection.InvokeAsync("SubscribeToSession", SessionId);
@@ -217,6 +219,7 @@ else
                 sessionRequest.Username = !string.IsNullOrEmpty(username) ? username : Session.ManagerUsername;
                 SessionState.IsManager = true;
                 SessionState.Username = sessionRequest.Username;
+                SessionState.SessionId = SessionId;
                 await StartSignalR();
                 await RefreshSession();
             }
@@ -231,7 +234,7 @@ else
             Session = await Http.GetFromJsonAsync<Session>($"api/session/{cleanSessionId}");
             if (Session != null && Session.ManagerUsername == sessionRequest.Username && Session.IsStarted)
             {
-                NavigationManager.NavigateTo("/session-roles", true);
+                NavigationManager.NavigateTo($"/session-roles?sessionId={SessionId}", true);
             }
         }
     }

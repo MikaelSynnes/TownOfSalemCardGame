@@ -2,6 +2,7 @@
 @using TownOfSalemCardGame.Shared
 @using TownOfSalemCardGame.Client.Shared
 @using TownOfSalemCardGame.Client.Components
+@using Microsoft.AspNetCore.SignalR.Client
 @inject SessionState SessionState
 @inject HttpClient Http
 @inject IJSRuntime JS
@@ -63,6 +64,42 @@ else if (SessionState.IsManager)
             </RoleCard>
         }
     </div>
+
+    <!-- Admin Chat Panel -->
+    <div class="tc-admin-send-panel mt-4">
+        <h5 class="tc-night-order-title">📢 Send Message to Players</h5>
+        <div class="tc-admin-send-row">
+            <select class="tc-admin-send-select" @bind="chatTarget">
+                <option value="">— select player —</option>
+                @foreach (var a in SessionState.PlayerAssignments!)
+                {
+                    <option value="@a.Player">@a.Player (@(a.Role?.Name ?? "?"))</option>
+                }
+            </select>
+            <input class="tc-admin-send-input"
+                   placeholder="Type a message…"
+                   @bind="chatMessage"
+                   @bind:event="oninput"
+                   @onkeydown="OnChatKeyDown" />
+            <button class="tc-admin-send-btn"
+                    @onclick="SendAdminMessage"
+                    disabled="@(string.IsNullOrWhiteSpace(chatMessage) || string.IsNullOrWhiteSpace(chatTarget))">
+                Send
+            </button>
+        </div>
+        @if (sentMessages.Count > 0)
+        {
+            <ul class="tc-admin-chat-list mt-2">
+                @foreach (var (target, msg) in sentMessages)
+                {
+                    <li class="tc-admin-chat-msg">
+                        <span class="tc-admin-chat-target">@(string.IsNullOrEmpty(target) ? "Everyone" : target):</span>
+                        @msg
+                    </li>
+                }
+            </ul>
+        }
+    </div>
 }
 else
 {
@@ -82,11 +119,30 @@ else
                       IsDead="@(myAssignment.States != null && myAssignment.States.Contains("Dead"))"
                       States="@myAssignment.States" />
         </div>
+        @if (receivedMessages.Count > 0)
+        {
+            <div class="tc-admin-chat-box mt-3">
+                <h6 class="tc-admin-chat-title">📢 Messages from Host</h6>
+                <ul class="tc-admin-chat-list">
+                    @foreach (var msg in receivedMessages)
+                    {
+                        <li class="tc-admin-chat-msg">@msg</li>
+                    }
+                </ul>
+            </div>
+        }
     }
 }
 
 @code {
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
+    private HubConnection? hubConnection;
+    private string chatMessage = string.Empty;
+    private string chatTarget = string.Empty;
+    private List<(string Target, string Message)> sentMessages = new();
+    private List<string> receivedMessages = new();
+    private string? _sessionId;
 
     // Base states every player can have regardless of roles in game
     private static readonly (string State, string Color)[] BaseStateOptions = new[]
@@ -236,17 +292,20 @@ else
     {
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        var sessionId = query["sessionId"];
-        if (!string.IsNullOrEmpty(sessionId))
+        _sessionId = query["sessionId"];
+        // Fall back to SessionState if the query string was not passed
+        if (string.IsNullOrEmpty(_sessionId))
+            _sessionId = SessionState.SessionId;
+        if (!string.IsNullOrEmpty(_sessionId))
         {
-            var assignments = await Http.GetFromJsonAsync<List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>>($"api/session/assignments/{sessionId}");
+            var assignments = await Http.GetFromJsonAsync<List<TownOfSalemCardGame.Shared.PlayerRoleAssignment>>($"api/session/assignments/{_sessionId}");
             if (assignments != null && assignments.Count > 0)
             {
                 SessionState.PlayerAssignments = assignments;
             }
             else
             {
-                var session = await Http.GetFromJsonAsync<Session>($"api/session/{sessionId}");
+                var session = await Http.GetFromJsonAsync<Session>($"api/session/{_sessionId}");
                 if (session != null && session.Assignments != null && session.Assignments.Count > 0)
                 {
                     SessionState.PlayerAssignments = session.Assignments;
@@ -267,6 +326,61 @@ else
                 }
             }
         }
+        if (!string.IsNullOrEmpty(_sessionId))
+        {
+            await StartSignalR(_sessionId);
+        }
+    }
+
+    private string GetSignalRHubUrl()
+    {
+        var baseUri = Http.BaseAddress?.ToString()?.TrimEnd('/') ?? NavigationManager.BaseUri.TrimEnd('/');
+        return $"{baseUri}/sessionHub";
+    }
+
+    private async Task StartSignalR(string sessionId)
+    {
+        var hubUrl = GetSignalRHubUrl();
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl)
+            .WithAutomaticReconnect()
+            .Build();
+        hubConnection.On<string, string?>("AdminMessage", (message, target) =>
+        {
+            receivedMessages.Add(message);
+            StateHasChanged();
+        });
+        await hubConnection.StartAsync();
+        if (SessionState.IsManager)
+        {
+            // Manager subscribes to session-wide group (to receive role-assign confirmations if needed)
+            await hubConnection.InvokeAsync("SubscribeToSession", sessionId);
+        }
+        else
+        {
+            // Player subscribes to their personal group to receive admin messages
+            var username = SessionState.Username ?? string.Empty;
+            await hubConnection.InvokeAsync("SubscribeToSession", $"{sessionId}_{username}");
+        }
+    }
+
+    private async Task SendAdminMessage()
+    {
+        if (string.IsNullOrWhiteSpace(chatMessage) || string.IsNullOrWhiteSpace(chatTarget) || string.IsNullOrEmpty(_sessionId))
+            return;
+        if (hubConnection == null || hubConnection.State != HubConnectionState.Connected)
+        {
+            await StartSignalR(_sessionId);
+        }
+        await hubConnection!.InvokeAsync("SendAdminMessage", _sessionId, chatMessage, chatTarget);
+        sentMessages.Add((chatTarget, chatMessage));
+        chatMessage = string.Empty;
+    }
+
+    private async Task OnChatKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await SendAdminMessage();
     }
 
     private record NightOrderEntry(int Priority, string RoleName, string Icon, string Faction, string NightAction, string Players);

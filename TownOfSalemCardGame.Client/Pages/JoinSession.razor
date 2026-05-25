@@ -32,6 +32,18 @@
         <div class="tos-alert tos-alert-info mt-4">
             ⏳ Waiting for host to start the game…
         </div>
+        @if (adminMessages.Count > 0)
+        {
+            <div class="tc-admin-chat-box mt-3">
+                <h6 class="tc-admin-chat-title">📢 Messages from Host</h6>
+                <ul class="tc-admin-chat-list">
+                    @foreach (var msg in adminMessages)
+                    {
+                        <li class="tc-admin-chat-msg">@msg</li>
+                    }
+                </ul>
+            </div>
+        }
         break;
 
     case ViewState.RoleReveal:
@@ -45,6 +57,18 @@
                       Description="@RoleDescription"
                       Faction="@GetFaction(RoleName)" />
         </div>
+        @if (adminMessages.Count > 0)
+        {
+            <div class="tc-admin-chat-box mt-3">
+                <h6 class="tc-admin-chat-title">📢 Messages from Host</h6>
+                <ul class="tc-admin-chat-list">
+                    @foreach (var msg in adminMessages)
+                    {
+                        <li class="tc-admin-chat-msg">@msg</li>
+                    }
+                </ul>
+            </div>
+        }
         break;
 }
 
@@ -59,6 +83,7 @@
     private HubConnection? hubConnection;
     private bool IsManager = false;
     private List<JoinSessionForm.PreviousSession> previousSessions = new();
+    private List<string> adminMessages = new();
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
@@ -148,6 +173,7 @@
                 Error = null;
                 SessionState.IsManager = true;
                 SessionState.Username = joinRequest.Username;
+                SessionState.SessionId = joinRequest.SessionId;
                 await SaveCurrentSession();
                 await StartSignalR();
                 if (session.IsStarted)
@@ -170,6 +196,7 @@
             Error = null;
             SessionState.IsManager = false;
             SessionState.Username = joinRequest.Username;
+            SessionState.SessionId = joinRequest.SessionId;
             await SaveCurrentSession();
             await StartSignalR();
 
@@ -220,7 +247,14 @@
                 StateHasChanged();
             }
         });
+        hubConnection.On<string, string?>("AdminMessage", (message, target) =>
+        {
+            adminMessages.Add(message);
+            StateHasChanged();
+        });
         await hubConnection.StartAsync();
+        // Subscribe to personal group (for role reveal) and session-wide group (for admin messages)
         await hubConnection.InvokeAsync("SubscribeToSession", $"{joinRequest.SessionId}_{joinRequest.Username}");
+        await hubConnection.InvokeAsync("SubscribeToSessionGroup", joinRequest.SessionId);
     }
 }
