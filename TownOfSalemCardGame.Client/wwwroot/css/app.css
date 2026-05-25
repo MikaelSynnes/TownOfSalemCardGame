@@ -1120,14 +1120,14 @@ code {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--tos-gold);
-    padding: 0.55rem 0.75rem;
+    padding: 0.2rem 0.3rem;
     text-align: left;
     background: rgba(0,0,0,0.3);
     white-space: nowrap;
 }
 
 .ra-table td {
-    padding: 0.65rem 0.85rem;
+    padding: 0.2rem 0.3rem;
     border-bottom: 1px solid var(--tos-border);
     vertical-align: middle;
 }
@@ -1150,21 +1150,23 @@ code {
 
 .ra-cell-name {
     font-family: 'Cinzel', serif;
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--tos-text-heading);
     white-space: nowrap;
+    width: 1%;
 }
 
 .ra-cell-desc {
     color: var(--tos-text-muted);
     font-size: 0.92rem;
     font-style: italic;
+    min-width: 160px;
 }
 
 .ra-col-count, .ra-cell-count {
     text-align: center;
-    width: 60px;
+    width: 28px;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--tos-gold-light);
@@ -1173,24 +1175,24 @@ code {
 
 .ra-col-actions, .ra-cell-actions {
     white-space: nowrap;
-    width: 90px;
+    width: 1%;
 }
 
 .ra-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 5px;
-    font-size: 1.15rem;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     border: 1px solid var(--tos-border);
     background: var(--tos-surface-3);
     color: var(--tos-text);
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-    margin-right: 4px;
+    margin-right: 3px;
 }
 
 .ra-btn:disabled {

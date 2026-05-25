@@ -6,23 +6,23 @@
         <table class="ra-table">
             <thead>
                 <tr>
+                    <th class="ra-col-actions"></th>
+                    <th class="ra-col-count">Count</th>
                     <th>Role</th>
                     <th>Description</th>
-                    <th class="ra-col-count">Count</th>
-                    <th class="ra-col-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var role in AvailableRoles)
                 {
                     <tr class="@(role.Count > 0 ? "ra-row-active" : "")">
-                        <td class="ra-cell-name">@role.Name</td>
-                        <td class="ra-cell-desc">@role.Description</td>
-                        <td class="ra-cell-count">@role.Count</td>
                         <td class="ra-cell-actions">
                             <button class="ra-btn ra-btn-minus" @onclick="() => OnDecrease.InvokeAsync(role)" disabled="@(role.Count == 0)">−</button>
                             <button class="ra-btn ra-btn-plus" @onclick="() => OnIncrease.InvokeAsync(role)">+</button>
                         </td>
+                        <td class="ra-cell-count">@role.Count</td>
+                        <td class="ra-cell-name">@role.Name</td>
+                        <td class="ra-cell-desc">@role.Description</td>
                     </tr>
                 }
             </tbody>
