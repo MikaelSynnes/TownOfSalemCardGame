@@ -31,6 +31,11 @@
 html, body {
     font-family: 'Crimson Text', Georgia, serif;
     background-color: var(--tos-bg);
+    background-image: url('/Images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--tos-text);
     min-height: 100vh;
 }

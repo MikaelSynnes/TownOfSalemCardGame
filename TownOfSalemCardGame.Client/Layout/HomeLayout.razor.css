@@ -1,6 +1,5 @@
 .home-layout {
     min-height: 100vh;
-    background-color: var(--tos-bg, #0e0c0a);
     display: flex;
     align-items: center;
     justify-content: center;
