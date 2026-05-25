@@ -7,6 +7,7 @@
 @inject HttpClient Http
 @inject SessionState SessionState
 @inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <h3>Create Session</h3>
 
@@ -133,6 +134,12 @@ else
     private async Task StartSignalR()
     {
         if (SessionId == null) return;
+        if (hubConnection != null)
+        {
+            await hubConnection.StopAsync();
+            await hubConnection.DisposeAsync();
+            hubConnection = null;
+        }
         var hubUrl = GetSignalRHubUrl();
         _ = JS.InvokeVoidAsync("console.log", $"Connecting to SignalR hub at: {hubUrl}");
         hubConnection = new HubConnectionBuilder()
@@ -331,5 +338,15 @@ else
         }
         assignment.States = new HashSet<string>(assignment.States);
         StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.StopAsync();
+            await hubConnection.DisposeAsync();
+            hubConnection = null;
+        }
     }
 }
