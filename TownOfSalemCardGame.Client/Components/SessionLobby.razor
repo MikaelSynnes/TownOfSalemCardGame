@@ -1,0 +1,29 @@
+@using TownOfSalemCardGame.Shared
+
+<div class="alert alert-success">
+    <strong>Session Created!</strong><br />
+    Session ID: <span class="fw-bold">@SessionId</span>
+</div>
+<p>Share this code with others to join your session.</p>
+<button class="btn btn-secondary mt-2" @onclick="OnRefresh">Refresh User List</button>
+
+<h5 class="mt-4">Participants:</h5>
+@if (Session?.Participants != null && Session.Participants.Count > 0)
+{
+    <ul>
+        @foreach (var user in Session.Participants)
+        {
+            <li>@user</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No participants found.</p>
+}
+
+@code {
+    [Parameter, EditorRequired] public string SessionId { get; set; } = default!;
+    [Parameter, EditorRequired] public Session? Session { get; set; }
+    [Parameter, EditorRequired] public EventCallback OnRefresh { get; set; }
+}

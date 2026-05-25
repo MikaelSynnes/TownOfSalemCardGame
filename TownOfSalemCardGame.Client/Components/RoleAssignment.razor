@@ -1,0 +1,49 @@
+@using TownOfSalemCardGame.Shared
+
+<h5 class="mt-4">Assign Roles</h5>
+<div class="table-responsive">
+    <table class="table table-responsive-cards">
+        <thead>
+            <tr>
+                <th>Role</th>
+                <th>Description</th>
+                <th>Count</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in AvailableRoles)
+            {
+                <tr>
+                    <td data-label="Role">@role.Name</td>
+                    <td data-label="Description">@role.Description</td>
+                    <td data-label="Count">@role.Count</td>
+                    <td data-label="Actions">
+                        <button class="btn btn-sm btn-secondary me-1" @onclick="() => OnDecrease.InvokeAsync(role)">−</button>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => OnIncrease.InvokeAsync(role)">+</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="mt-3">
+    <span class="@(TotalAssigned == PlayerCount ? "text-success" : "text-danger") fw-bold">
+        Roles assigned: @TotalAssigned / @PlayerCount players
+    </span>
+</div>
+<button class="btn btn-success mt-2"
+        @onclick="OnStartGame"
+        disabled="@(TotalAssigned != PlayerCount || PlayerCount == 0)">
+    Start Game
+</button>
+
+@code {
+    [Parameter, EditorRequired] public List<RoleInfo> AvailableRoles { get; set; } = default!;
+    [Parameter, EditorRequired] public int PlayerCount { get; set; }
+    [Parameter, EditorRequired] public EventCallback<RoleInfo> OnIncrease { get; set; }
+    [Parameter, EditorRequired] public EventCallback<RoleInfo> OnDecrease { get; set; }
+    [Parameter, EditorRequired] public EventCallback OnStartGame { get; set; }
+
+    private int TotalAssigned => AvailableRoles.Sum(r => r.Count);
+}

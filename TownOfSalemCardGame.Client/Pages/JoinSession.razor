@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
+@using System.Text.Json
 @inject HttpClient Http
 @inject IJSRuntime JS
 
@@ -11,6 +12,30 @@
 
 @if (!Joined)
 {
+    @if (previousSessions.Count > 0)
+    {
+        <div class="card shadow-sm mx-auto mb-4" style="max-width: 480px;">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Previous Sessions</h5>
+                <ul class="list-group">
+                    @foreach (var session in previousSessions)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <button class="btn btn-link p-0 text-start flex-grow-1"
+                                    @onclick="() => SelectPreviousSession(session)">
+                                <span class="fw-bold">@session.SessionId</span>
+                                <span class="text-muted ms-2">(@session.Username)</span>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger ms-2"
+                                    title="Remove"
+                                    @onclick="() => RemovePreviousSession(session)">✕</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
     <div class="card shadow-sm mx-auto" style="max-width: 480px;">
         <div class="card-body">
             <h5 class="card-title mb-3">Enter session details</h5>
@@ -68,8 +93,56 @@ else
     private string? RoleDescription;
     private HubConnection? hubConnection;
     private bool IsManager = false;
+    private List<PreviousSession> previousSessions = new();
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
+
+    private record PreviousSession(string SessionId, string Username, string SavedAt);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadPreviousSessions();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadPreviousSessions()
+    {
+        try
+        {
+            var result = await JS.InvokeAsync<JsonElement>("previousSessions.getAll");
+            previousSessions = new List<PreviousSession>();
+            foreach (var item in result.EnumerateArray())
+            {
+                var sessionId = item.GetProperty("sessionId").GetString() ?? "";
+                var username = item.GetProperty("username").GetString() ?? "";
+                var savedAt = item.TryGetProperty("savedAt", out var sa) ? sa.GetString() ?? "" : "";
+                previousSessions.Add(new PreviousSession(sessionId, username, savedAt));
+            }
+        }
+        catch { previousSessions = new(); }
+    }
+
+    private void SelectPreviousSession(PreviousSession session)
+    {
+        joinRequest.SessionId = session.SessionId;
+        joinRequest.Username = session.Username;
+        Error = null;
+    }
+
+    private async Task RemovePreviousSession(PreviousSession session)
+    {
+        await JS.InvokeVoidAsync("previousSessions.remove", session.SessionId, session.Username);
+        previousSessions.Remove(session);
+    }
+
+    private async Task SaveCurrentSession()
+    {
+        await JS.InvokeVoidAsync("previousSessions.save", joinRequest.SessionId, joinRequest.Username);
+        await LoadPreviousSessions();
+    }
 
     private async Task JoinSessionHandler()
     {
@@ -83,6 +156,7 @@ else
                 IsManager = true;
                 Joined = true;
                 Error = null;
+                await SaveCurrentSession();
                 await StartSignalR();
                 // Navigate based on game state
                 if (session.IsStarted)
@@ -104,6 +178,7 @@ else
         {
             Joined = true;
             Error = null;
+            await SaveCurrentSession();
             await StartSignalR();
         }
         else

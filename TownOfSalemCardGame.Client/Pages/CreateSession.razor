@@ -3,8 +3,7 @@
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.SignalR.Client
 @using TownOfSalemCardGame.Client.Shared
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.Components
+@using TownOfSalemCardGame.Client.Components
 @inject HttpClient Http
 @inject SessionState SessionState
 @inject IJSRuntime JS
@@ -13,133 +12,29 @@
 
 @if (SessionId == null)
 {
-    <div class="card shadow-sm mx-auto" style="max-width: 480px;">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Start a new game</h5>
-            <EditForm Model="sessionRequest" OnValidSubmit="CreateSessionHandler">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <div class="mb-3">
-                    <label class="form-label">Username:</label>
-                    <InputText @bind-Value="sessionRequest.Username" class="form-control" placeholder="Enter your username" />
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Create Session</button>
-            </EditForm>
-        </div>
-    </div>
+    <CreateSessionForm SessionRequest="sessionRequest" OnValidSubmit="CreateSessionHandler" />
 }
 else
 {
-    <div class="alert alert-success">
-        <strong>Session Created!</strong><br />
-        Session ID: <span class="fw-bold">@SessionId</span>
-    </div>
-    <p>Share this code with others to join your session.</p>
-    <button class="btn btn-secondary mt-2" @onclick="RefreshSession">Refresh User List</button>
-    <h5 class="mt-4">Participants:</h5>
-    @if (Session != null)
+    <SessionLobby SessionId="@SessionId" Session="Session" OnRefresh="RefreshSession" />
+
+    @if (Session != null && Session.ManagerUsername == sessionRequest.Username)
     {
-        <ul>
-            @foreach (var user in @Session.Participants)
-            {
-                <li>@user</li>
-            }
-        </ul>
-    }
-    else
-    {
-        <p>No participants found.</p>
+        <RoleAssignment AvailableRoles="AvailableRoles"
+                        PlayerCount="Session.Participants?.Count ?? 0"
+                        OnIncrease="role => { IncreaseRole(role); }"
+                        OnDecrease="role => { DecreaseRole(role); }"
+                        OnStartGame="StartGame" />
     }
 
-    @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username)
+    @if (Session != null && Session.ManagerUsername == sessionRequest.Username && playerAssignments != null)
     {
-        <h5 class="mt-4">Assign Roles</h5>
-        <div class="table-responsive">
-            <table class="table table-responsive-cards">
-                <thead>
-                    <tr>
-                        <th>Role</th>
-                        <th>Description</th>
-                        <th>Count</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var role in AvailableRoles)
-                    {
-                        <tr>
-                            <td data-label="Role">@role.Name</td>
-                            <td data-label="Description">@role.Description</td>
-                            <td data-label="Count">@role.Count</td>
-                            <td data-label="Actions">
-                                <button class="btn btn-sm btn-secondary me-1" @onclick="() => DecreaseRole(role)">−</button>
-                                <button class="btn btn-sm btn-secondary" @onclick="() => IncreaseRole(role)">+</button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-3">
-            <span class="@(AvailableRoles.Sum(r => r.Count) == (Session?.Participants?.Count ?? 0) ? "text-success" : "text-danger") fw-bold">
-                Roles assigned: @AvailableRoles.Sum(r => r.Count) / @(Session?.Participants?.Count ?? 0) players
-            </span>
-        </div>
-        <button class="btn btn-success mt-2" @onclick="StartGame" disabled="@(AvailableRoles.Sum(r => r.Count) != (Session?.Participants?.Count ?? 0) || (Session?.Participants?.Count ?? 0) == 0)">Start Game</button>
-    }
-
-    @if (SessionId != null && Session != null && Session.ManagerUsername == sessionRequest.Username && PlayerAssignments != null)
-    {
-        <div class="alert alert-info mt-4">
-            <strong>Player Roles:</strong>
-            <div class="table-responsive mt-2">
-                <table class="table table-bordered table-responsive-cards">
-                    <thead>
-                        <tr>
-                            <th>Player</th>
-                            <th>Role</th>
-                            <th>Description</th>
-                            <th>States</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var assignment in PlayerAssignments)
-                        {
-                            <tr>
-                                <td data-label="Player">@assignment.Player</td>
-                                <td data-label="Role">@assignment.Role?.Name</td>
-                                <td data-label="Description">@assignment.Role?.Description</td>
-                                <td data-label="States">
-                                    @if (assignment.States != null && assignment.States.Count > 0)
-                                    {
-                                        @foreach (var state in assignment.States)
-                                        {
-                                            var color = AdminStateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
-                                            <span class="badge bg-@color me-1">@state</span>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">None</span>
-                                    }
-                                </td>
-                                <td data-label="Actions">
-                                    <div class="d-flex flex-wrap gap-1">
-                                        @foreach (var (state, color) in AdminStateOptions)
-                                        {
-                                            <button class="btn btn-sm @(assignment.States != null && assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)" @onclick="() => AdminToggleState(assignment, state)">@state</button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <PlayerAssignments Assignments="playerAssignments"
+                           OnToggleState="args => AdminToggleState(args.Item1, args.Item2)"
+                           OnToggleNecronomicon="assignment => ToggleNecronomicon(assignment)" />
     }
 }
+
 
 @code {
     private SessionRequest sessionRequest = new();
@@ -166,7 +61,6 @@ else
         new RoleInfo { Name = "Jailor", Description = "Can jail a player at night, preventing all actions on or by them, and may execute them.", Count = 0 },
         new RoleInfo { Name = "Tracker", Description = "Can track one player to see who they visited last night.", Count = 0 },
         new RoleInfo { Name = "Lookout", Description = "Can watch a player to see who visited them last night.", Count = 0 },
-        new RoleInfo { Name = "Spy", Description = "Can bug a player to hear all Mafia chat and see who visited them.", Count = 0 },
         new RoleInfo { Name = "Crusader", Description = "Can protect a player and attack one of their visitors each night.", Count = 0 },
         new RoleInfo { Name = "Psychic", Description = "Receives visions at night revealing groups of innocent or evil players.", Count = 0 },
         new RoleInfo { Name = "Trap Master", Description = "Can place a trap on a player that kills and reveals any evil visitor.", Count = 0 },
@@ -191,20 +85,20 @@ else
         new RoleInfo { Name = "Executioner", Description = "Has a target and wins by getting that specific player lynched by the town.", Count = 0 },
         new RoleInfo { Name = "Amnesiac", Description = "Has forgotten their role and can remember a dead player's role to become it.", Count = 0 },
         new RoleInfo { Name = "Guardian Angel", Description = "Has a target they protect. Wins if their target survives to the end of the game.", Count = 0 },
-        new RoleInfo { Name = "Pirate", Description = "Plunders players to steal their items and wins by successfully plundering twice.", Count = 0 },
-        new RoleInfo { Name = "Plaguebearer", Description = "Infects all players and becomes Pestilence, a nearly unstoppable killing force.", Count = 0 },
+        // new RoleInfo { Name = "Pirate", Description = "Plunders players to steal their items and wins by successfully plundering twice.", Count = 0 },
+        // new RoleInfo { Name = "Plaguebearer", Description = "Infects all players and becomes Pestilence, a nearly unstoppable killing force.", Count = 0 },
         new RoleInfo { Name = "Survivor", Description = "Has no special ability, but wins by simply surviving to the end of the game.", Count = 0 },
         // Coven
-        new RoleInfo { Name = "Coven Leader", Description = "The leader of the Coven. Can control a player and, with the Necronomicon, kill them.", Count = 0 },
-        new RoleInfo { Name = "Medusa", Description = "Can stone gaze all visitors to her house, killing them. With Necronomicon, can petrify from afar.", Count = 0 },
-        new RoleInfo { Name = "Necromancer", Description = "Can use the ability of a dead player to target someone each night.", Count = 0 },
-        new RoleInfo { Name = "Hex Master", Description = "Can hex all players; when all living players are hexed, they all die simultaneously.", Count = 0 },
+        // new RoleInfo { Name = "Coven Leader", Description = "The leader of the Coven. Can control a player and, with the Necronomicon, kill them.", Count = 0 },
+        // new RoleInfo { Name = "Medusa", Description = "Can stone gaze all visitors to her house, killing them. With Necronomicon, can petrify from afar.", Count = 0 },
+        // new RoleInfo { Name = "Necromancer", Description = "Can use the ability of a dead player to target someone each night.", Count = 0 },
+        // new RoleInfo { Name = "Hex Master", Description = "Can hex all players; when all living players are hexed, they all die simultaneously.", Count = 0 },
         new RoleInfo { Name = "Potion Master", Description = "Has three potions: heal, reveal role, and kill. Can use one per night.", Count = 0 },
         new RoleInfo { Name = "Poisoner", Description = "Can poison a player, causing them to die the following night unless healed.", Count = 0 },
     };
 
     // Holds player-role assignments for the manager
-    private List<PlayerRoleAssignment>? PlayerAssignments;
+    private List<PlayerRoleAssignment>? playerAssignments;
 
     private async Task CreateSessionHandler()
     {
@@ -392,19 +286,22 @@ else
         }
     }
 
-    private static readonly (string State, string Color)[] AdminStateOptions = new[]
+    private void ToggleNecronomicon(PlayerRoleAssignment assignment)
     {
-        ("Alive", "success"),
-        ("Dead", "danger"),
-        ("Muted", "secondary"),
-        ("Protected", "info"),
-        ("Saved", "warning"),
-        ("Doused", "warning"),
-        ("Hexed", "purple"),
-        ("Poisoned", "dark"),
-        ("Jailed", "primary"),
-        ("Cleaned", "light")
-    };
+        if (assignment.HasNecronomicon)
+        {
+            assignment.HasNecronomicon = false;
+        }
+        else
+        {
+            // Remove from current holder
+            if (playerAssignments != null)
+                foreach (var a in playerAssignments)
+                    a.HasNecronomicon = false;
+            assignment.HasNecronomicon = true;
+        }
+        StateHasChanged();
+    }
 
     private void AdminToggleState(PlayerRoleAssignment assignment, string state)
     {

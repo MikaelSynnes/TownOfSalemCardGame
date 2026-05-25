@@ -22,3 +22,24 @@ window.sessionCookie = {
         document.cookie = name + '=; Max-Age=-99999999;';
     }
 };
+
+window.previousSessions = {
+    _key: "previousSessions",
+    getAll: function () {
+        try {
+            const raw = localStorage.getItem(this._key);
+            return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+    },
+    save: function (sessionId, username) {
+        let sessions = this.getAll();
+        sessions = sessions.filter(s => !(s.sessionId === sessionId && s.username === username));
+        sessions.unshift({ sessionId, username, savedAt: new Date().toISOString() });
+        if (sessions.length > 10) sessions = sessions.slice(0, 10);
+        localStorage.setItem(this._key, JSON.stringify(sessions));
+    },
+    remove: function (sessionId, username) {
+        let sessions = this.getAll().filter(s => !(s.sessionId === sessionId && s.username === username));
+        localStorage.setItem(this._key, JSON.stringify(sessions));
+    }
+};

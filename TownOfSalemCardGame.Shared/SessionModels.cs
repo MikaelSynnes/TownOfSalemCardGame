@@ -331,4 +331,5 @@ public class PlayerRoleAssignment
     public string? Player { get; set; }
     public RoleInfo? Role { get; set; }
     public HashSet<string> States { get; set; } = new();
+    public bool HasNecronomicon { get; set; } = false;
 }

@@ -1,0 +1,93 @@
+@using TownOfSalemCardGame.Shared
+
+<div class="alert alert-info mt-4">
+    <strong>Player Roles:</strong>
+    <div class="table-responsive mt-2">
+        <table class="table table-bordered table-responsive-cards">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Role</th>
+                    <th>Description</th>
+                    <th>States</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assignment in Assignments)
+                {
+                    <tr>
+                        <td data-label="Player">@assignment.Player</td>
+                        <td data-label="Role">@assignment.Role?.Name</td>
+                        <td data-label="Description">@assignment.Role?.Description</td>
+                        <td data-label="States">
+                            @if (assignment.States != null && assignment.States.Count > 0)
+                            {
+                                @foreach (var state in assignment.States)
+                                {
+                                    var color = StateOptions.FirstOrDefault(opt => opt.State == state).Color ?? "secondary";
+                                    <span class="badge bg-@color me-1">@state</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">None</span>
+                            }
+                            @if (assignment.HasNecronomicon)
+                            {
+                                <span class="badge bg-dark ms-1" title="Holds the Necronomicon">📖 Necronomicon</span>
+                            }
+                        </td>
+                        <td data-label="Actions">
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var (state, color) in StateOptions)
+                                {
+                                    <button class="btn btn-sm @(assignment.States != null && assignment.States.Contains(state) ? $"btn-{color}" : "btn-outline-" + color)"
+                                            @onclick="() => OnToggleState.InvokeAsync((assignment, state))">
+                                        @state
+                                    </button>
+                                }
+                                @if (IsCovenRole(assignment.Role?.Name))
+                                {
+                                    <button class="btn btn-sm @(assignment.HasNecronomicon ? "btn-dark" : "btn-outline-dark")"
+                                            @onclick="() => OnToggleNecronomicon.InvokeAsync(assignment)"
+                                            title="Give or take the Necronomicon">
+                                        📖 Necronomicon
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public List<PlayerRoleAssignment> Assignments { get; set; } = default!;
+    [Parameter, EditorRequired] public EventCallback<(PlayerRoleAssignment, string)> OnToggleState { get; set; }
+    [Parameter, EditorRequired] public EventCallback<PlayerRoleAssignment> OnToggleNecronomicon { get; set; }
+
+    public static readonly (string State, string Color)[] StateOptions = new[]
+    {
+        ("Alive", "success"),
+        ("Dead", "danger"),
+        ("Muted", "secondary"),
+        ("Protected", "info"),
+        ("Saved", "warning"),
+        ("Doused", "warning"),
+        ("Hexed", "purple"),
+        ("Poisoned", "dark"),
+        ("Jailed", "primary"),
+        ("Cleaned", "light")
+    };
+
+    private static readonly HashSet<string> CovenRoleNames = new()
+    {
+        "Coven Leader", "Medusa", "Necromancer", "Hex Master", "Potion Master", "Poisoner"
+    };
+
+    private static bool IsCovenRole(string? roleName) =>
+        roleName != null && CovenRoleNames.Contains(roleName);
+}

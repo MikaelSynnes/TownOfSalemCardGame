@@ -1,17 +1,15 @@
 ﻿@page "/"
 @layout MainLayout
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
-<div class="home-hero">
-    <h1 class="home-title">⚖️ Town of Salem</h1>
-    <p class="home-subtitle">Card Game</p>
-    <p class="home-desc">Gather your friends, assign roles, and uncover the truth — or hide it.</p>
-    <div class="home-actions">
-        <a href="/create-session" class="btn btn-primary btn-lg">Create Session</a>
-        <a href="/join-session" class="btn btn-outline-secondary btn-lg">Join Session</a>
-    </div>
-</div>
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("/join-session", replace: true);
+    }
+}
 
 <style>
     .home-hero {
