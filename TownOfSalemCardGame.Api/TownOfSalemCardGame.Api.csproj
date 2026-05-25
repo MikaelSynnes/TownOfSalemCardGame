@@ -19,4 +19,8 @@
         <ProjectReference Include="..\TownOfSalemCardGame.Client\TownOfSalemCardGame.Client.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Remove="wwwroot\Images\**" />
+    </ItemGroup>
+
 </Project>
