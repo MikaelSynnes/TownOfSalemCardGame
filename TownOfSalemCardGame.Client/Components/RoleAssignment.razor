@@ -2,42 +2,42 @@
 
 <div class="tos-panel mt-4">
     <div class="tos-panel-title">🃏 Assign Roles</div>
-    <div class="table-responsive">
-        <table class="table table-bordered table-responsive-cards">
+    <div class="ra-table-wrap">
+        <table class="ra-table">
             <thead>
                 <tr>
                     <th>Role</th>
                     <th>Description</th>
-                    <th>Count</th>
-                    <th>Actions</th>
+                    <th class="ra-col-count">Count</th>
+                    <th class="ra-col-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var role in AvailableRoles)
                 {
-                    <tr>
-                        <td data-label="Role">@role.Name</td>
-                        <td data-label="Description">@role.Description</td>
-                        <td data-label="Count">@role.Count</td>
-                        <td data-label="Actions">
-                            <button class="btn btn-sm btn-secondary me-1" @onclick="() => OnDecrease.InvokeAsync(role)">−</button>
-                            <button class="btn btn-sm btn-secondary" @onclick="() => OnIncrease.InvokeAsync(role)">+</button>
+                    <tr class="@(role.Count > 0 ? "ra-row-active" : "")">
+                        <td class="ra-cell-name">@role.Name</td>
+                        <td class="ra-cell-desc">@role.Description</td>
+                        <td class="ra-cell-count">@role.Count</td>
+                        <td class="ra-cell-actions">
+                            <button class="ra-btn ra-btn-minus" @onclick="() => OnDecrease.InvokeAsync(role)" disabled="@(role.Count == 0)">−</button>
+                            <button class="ra-btn ra-btn-plus" @onclick="() => OnIncrease.InvokeAsync(role)">+</button>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-    <div class="mt-3">
-        <span class="@(TotalAssigned == PlayerCount ? "text-success" : "text-danger") fw-bold" style="font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.06em;">
+    <div class="ra-footer">
+        <span class="ra-tally @(TotalAssigned == PlayerCount && PlayerCount > 0 ? "ra-tally-ok" : "ra-tally-bad")">
             Roles assigned: @TotalAssigned / @PlayerCount players
         </span>
+        <button class="tos-btn-start"
+                @onclick="OnStartGame"
+                disabled="@(TotalAssigned != PlayerCount || PlayerCount == 0)">
+            ⚔️ Start Game
+        </button>
     </div>
-    <button class="btn btn-primary mt-2"
-            @onclick="OnStartGame"
-            disabled="@(TotalAssigned != PlayerCount || PlayerCount == 0)">
-        ⚔️ Start Game
-    </button>
 </div>
 
 @code {

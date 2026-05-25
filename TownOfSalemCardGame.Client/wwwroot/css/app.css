@@ -844,4 +844,365 @@ code {
         text-transform: uppercase;
     }
 }
+
+/* ========================================================
+   Page heading
+   ======================================================== */
+
+.tos-page-heading {
+    font-family: 'Cinzel', serif;
+    color: var(--tos-gold-light);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 12px rgba(201,168,76,0.3);
+    border-bottom: 1px solid var(--tos-border);
+    padding-bottom: 0.4rem;
+}
+
+/* ========================================================
+   Previous Sessions list
+   ======================================================== */
+
+.ps-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ps-item {
+    display: flex;
+    align-items: center;
+    background: var(--tos-surface-2);
+    border: 1px solid var(--tos-border);
+    border-radius: 6px;
+    padding: 0.45rem 0.75rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ps-item:hover {
+    border-color: var(--tos-border-glow);
+    background: var(--tos-surface-3);
+}
+
+.ps-select-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.ps-session-id {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+}
+
+.ps-username {
+    color: var(--tos-text-muted);
+    font-size: 0.82rem;
+}
+
+.ps-remove-btn {
+    background: none;
+    border: 1px solid var(--tos-red-light);
+    color: var(--tos-red-light);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ps-remove-btn:hover {
+    background: var(--tos-red-light);
+    color: #fff;
+}
+
+/* ========================================================
+   Dark-themed form inputs & labels
+   ======================================================== */
+
+.tos-field {
+    margin-bottom: 1rem;
+}
+
+.tos-label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--tos-gold);
+    margin-bottom: 0.35rem;
+}
+
+.tos-input {
+    width: 100%;
+    background: var(--tos-surface-3);
+    border: 1px solid var(--tos-border);
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    color: var(--tos-text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.tos-input:focus {
+    outline: none;
+    border-color: var(--tos-border-glow);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.18);
+}
+
+.tos-input::placeholder {
+    color: var(--tos-text-muted);
+}
+
+/* ========================================================
+   Primary action button (full-width form submit)
+   ======================================================== */
+
+.tos-btn-primary {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 1.2rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #c9a84c 0%, #8b6914 100%);
+    color: #0e0c0a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    box-shadow: 0 3px 14px rgba(201,168,76,0.28);
+    transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tos-btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(201,168,76,0.45);
+}
+
+/* ========================================================
+   Dark-theme alerts
+   ======================================================== */
+
+.tos-alert {
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.92rem;
+    border-left: 4px solid;
+}
+
+.tos-alert-success {
+    background: rgba(46, 92, 46, 0.35);
+    border-color: var(--tos-town-light);
+    color: #a0f0a0;
+}
+
+.tos-alert-info {
+    background: rgba(26, 26, 78, 0.45);
+    border-color: var(--tos-mafia-light);
+    color: #a0a8f0;
+}
+
+.tos-alert-warn {
+    background: rgba(61, 58, 26, 0.45);
+    border-color: var(--tos-neutral-light);
+    color: var(--tos-neutral-light);
+}
+
+.tos-error {
+    border-radius: 6px;
+    padding: 0.65rem 1rem;
+    font-size: 0.88rem;
+    background: rgba(139, 26, 26, 0.35);
+    border-left: 4px solid var(--tos-red-light);
+    color: #f0a0a0;
+}
+
+.tos-highlight {
+    color: var(--tos-gold-light);
+    font-weight: 700;
+}
+
+/* ========================================================
+   Role Assignment table
+   ======================================================== */
+
+.ra-table-wrap {
+    overflow-x: auto;
+}
+
+.ra-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    color: var(--tos-text);
+}
+
+.ra-table thead tr {
+    border-bottom: 2px solid var(--tos-border-glow);
+}
+
+.ra-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tos-gold);
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    background: rgba(0,0,0,0.3);
+    white-space: nowrap;
+}
+
+.ra-table td {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid var(--tos-border);
+    vertical-align: middle;
+}
+
+.ra-table tbody tr {
+    transition: background 0.12s ease;
+}
+
+.ra-table tbody tr:hover {
+    background: var(--tos-surface-2);
+}
+
+.ra-row-active {
+    background: rgba(201,168,76,0.07);
+}
+
+.ra-row-active:hover {
+    background: rgba(201,168,76,0.12) !important;
+}
+
+.ra-cell-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--tos-text-heading);
+    white-space: nowrap;
+}
+
+.ra-cell-desc {
+    color: var(--tos-text-muted);
+    font-size: 0.92rem;
+    font-style: italic;
+}
+
+.ra-col-count, .ra-cell-count {
+    text-align: center;
+    width: 60px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    font-family: 'Cinzel', serif;
+}
+
+.ra-col-actions, .ra-cell-actions {
+    white-space: nowrap;
+    width: 90px;
+}
+
+.ra-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 5px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--tos-border);
+    background: var(--tos-surface-3);
+    color: var(--tos-text);
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    margin-right: 4px;
+}
+
+.ra-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.ra-btn-plus:not(:disabled):hover {
+    background: rgba(76,175,80,0.25);
+    border-color: var(--tos-town-light);
+    color: var(--tos-town-light);
+}
+
+.ra-btn-minus:not(:disabled):hover {
+    background: rgba(192,57,43,0.25);
+    border-color: var(--tos-red-light);
+    color: var(--tos-red-light);
+}
+
+.ra-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--tos-border);
+}
+
+.ra-tally {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+}
+
+.ra-tally-ok  { color: var(--tos-town-light); }
+.ra-tally-bad { color: var(--tos-red-light); }
+
+.tos-btn-start {
+    padding: 0.5rem 1.4rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #c9a84c 0%, #8b6914 100%);
+    color: #0e0c0a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 3px 14px rgba(201,168,76,0.28);
+    transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tos-btn-start:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(201,168,76,0.45);
+}
+
+.tos-btn-start:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
 }

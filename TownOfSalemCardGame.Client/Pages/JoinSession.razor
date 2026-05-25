@@ -11,69 +11,62 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 
-<h3>Join Session</h3>
+<h3 class="tos-page-heading">Join Session</h3>
 
 @if (!Joined)
 {
     @if (previousSessions.Count > 0)
     {
-        <div class="card shadow-sm mx-auto mb-4" style="max-width: 480px;">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Previous Sessions</h5>
-                <ul class="list-group">
-                    @foreach (var session in previousSessions)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <button class="btn btn-link p-0 text-start flex-grow-1"
-                                    @onclick="() => SelectPreviousSession(session)">
-                                <span class="fw-bold">@session.SessionId</span>
-                                <span class="text-muted ms-2">(@session.Username)</span>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger ms-2"
-                                    title="Remove"
-                                    @onclick="() => RemovePreviousSession(session)">✕</button>
-                        </li>
-                    }
-                </ul>
-            </div>
+        <div class="tos-panel mx-auto mb-4" style="max-width: 480px;">
+            <h5 class="tos-panel-title">Previous Sessions</h5>
+            <ul class="ps-list">
+                @foreach (var session in previousSessions)
+                {
+                    <li class="ps-item">
+                        <button class="ps-select-btn" @onclick="() => SelectPreviousSession(session)">
+                            <span class="ps-session-id">@session.SessionId</span>
+                            <span class="ps-username">@session.Username</span>
+                        </button>
+                        <button class="ps-remove-btn" title="Remove" @onclick="() => RemovePreviousSession(session)">✕</button>
+                    </li>
+                }
+            </ul>
         </div>
     }
 
-    <div class="card shadow-sm mx-auto" style="max-width: 480px;">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Enter session details</h5>
-            <EditForm Model="joinRequest" OnValidSubmit="JoinSessionHandler">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <div class="mb-3">
-                    <label class="form-label">Session ID:</label>
-                    <InputText @bind-Value="joinRequest.SessionId" class="form-control" placeholder="Enter session ID" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Username:</label>
-                    <InputText @bind-Value="joinRequest.Username" class="form-control" placeholder="Enter your username" />
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Join Session</button>
-            </EditForm>
-            @if (Error != null)
-            {
-                <div class="alert alert-danger mt-3">@Error</div>
-            }
-        </div>
+    <div class="tos-panel mx-auto" style="max-width: 480px;">
+        <h5 class="tos-panel-title">Enter session details</h5>
+        <EditForm Model="joinRequest" OnValidSubmit="JoinSessionHandler">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="tos-field">
+                <label class="tos-label">Session ID</label>
+                <InputText @bind-Value="joinRequest.SessionId" class="tos-input" placeholder="Enter session ID" />
+            </div>
+            <div class="tos-field">
+                <label class="tos-label">Username</label>
+                <InputText @bind-Value="joinRequest.Username" class="tos-input" placeholder="Enter your username" />
+            </div>
+            <button type="submit" class="tos-btn-primary w-100">Join Session</button>
+        </EditForm>
+        @if (Error != null)
+        {
+            <div class="tos-error mt-3">@Error</div>
+        }
     </div>
 }
 else
 {
-    <div class="alert alert-success">
+    <div class="tos-alert tos-alert-success">
         <strong>Joined Session!</strong><br />
-        Session ID: <span class="fw-bold">@joinRequest.SessionId</span>
+        Session ID: <span class="tos-highlight">@joinRequest.SessionId</span>
     </div>
 }
 
 @if (Joined && RoleName == null)
 {
-    <div class="alert alert-info mt-4">
-        ⏳ Waiting for host to start the game...
+    <div class="tos-alert tos-alert-info mt-4">
+        ⏳ Waiting for host to start the game…
     </div>
 }
 @if (Joined && RoleName != null)

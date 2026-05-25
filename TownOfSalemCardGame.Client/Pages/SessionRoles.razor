@@ -6,11 +6,11 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 
-<h3>@(SessionState.IsManager ? "Session Overview" : "Your Role")</h3>
+<h3 class="tos-page-heading">@(SessionState.IsManager ? "Session Overview" : "Your Role")</h3>
 
 @if (SessionState.PlayerAssignments == null || SessionState.PlayerAssignments.Count == 0)
 {
-    <div class="alert alert-warning">No assignments to display.</div>
+    <div class="tos-alert tos-alert-warn">No assignments to display.</div>
 }
 else if (SessionState.IsManager)
 {
@@ -45,7 +45,7 @@ else
     var myAssignment = SessionState.PlayerAssignments.FirstOrDefault(a => a.Player == SessionState.Username);
     @if (myAssignment == null)
     {
-        <div class="alert alert-warning">Your role could not be found.</div>
+        <div class="tos-alert tos-alert-warn">Your role could not be found.</div>
     }
     else
     {
