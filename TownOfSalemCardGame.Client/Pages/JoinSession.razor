@@ -160,9 +160,12 @@
 
     [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
+    [SupplyParameterFromQuery(Name = "gameId")]
+    public string? GameId { get; set; }
+
     private static readonly HashSet<string> TownRoleNames = new()
     {
-        "Townie", "Hateful Townie", "Peaceful Townie", "Sheriff", "Doctor", "Investigator", "Escort", "Mayor", "Bodyguard",
+        "Townie",
         "Vigilante", "Veteran", "Medium", "Retributionist", "Transporter", "Jailor",
         "Tracker", "Lookout", "Spy", "Crusader", "Psychic", "Trap Master", "Coroner"
     };
@@ -185,6 +188,12 @@
         if (MafiaRoleNames.Contains(roleName)) return "mafia";
         if (CovenRoleNames.Contains(roleName)) return "coven";
         return "neutral";
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(GameId))
+            joinRequest.SessionId = GameId;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

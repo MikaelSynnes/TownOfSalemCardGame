@@ -1,29 +1,94 @@
 @using TownOfSalemCardGame.Shared
+@inject NavigationManager NavigationManager
 
-<div class="alert alert-success">
-    <strong>Session Created!</strong><br />
-    Session ID: <span class="fw-bold">@SessionId</span>
+<div class="tos-panel lobby-header-panel">
+    <div class="lobby-session-id-row">
+        <span class="tos-panel-title mb-0">Session</span>
+        <span class="lobby-session-id">@SessionId</span>
+    </div>
+    <p class="lobby-subtitle">Share the invite link or QR code below so players can join.</p>
+
+    <div class="tos-field">
+        <label class="tos-label">Invite link</label>
+        <div class="lobby-invite-row">
+            <input type="text" class="tos-input lobby-invite-input" readonly value="@JoinLink" />
+            <button class="tos-btn-secondary lobby-copy-btn" type="button" @onclick="CopyLink">
+                @if (_copied)
+                {
+                    <span>✓ Copied</span>
+                }
+                else
+                {
+                    <span>Copy</span>
+                }
+            </button>
+        </div>
+    </div>
+
+    <div class="lobby-qr-wrap">
+        <p class="tos-label mb-2">Scan to join</p>
+        <div class="lobby-qr-frame">
+            <img src="@QrCodeUrl" alt="QR code for invite link" width="160" height="160" />
+        </div>
+    </div>
 </div>
-<p>Share this code with others to join your session.</p>
-<button class="btn btn-secondary mt-2" @onclick="OnRefresh">Refresh User List</button>
 
-<h5 class="mt-4">Participants:</h5>
-@if (Session?.Participants != null && Session.Participants.Count > 0)
-{
-    <ul>
-        @foreach (var user in Session.Participants)
-        {
-            <li>@user</li>
-        }
-    </ul>
-}
-else
-{
-    <p>No participants found.</p>
-}
+<div class="tos-panel">
+    <h5 class="tos-panel-title">
+        Participants
+        <span class="lobby-participant-count">@(Session?.Participants?.Count ?? 0)</span>
+    </h5>
+
+    @if (Session?.Participants != null && Session.Participants.Count > 0)
+    {
+        <ul class="lobby-participant-list">
+            @foreach (var (user, index) in Session.Participants.Select((u, i) => (u, i + 1)))
+            {
+                <li class="lobby-participant-item">
+                    <span class="lobby-participant-index">@index</span>
+                    <span class="lobby-participant-avatar">@(user.Length > 0 ? char.ToUpper(user[0]).ToString() : "?")</span>
+                    <span class="lobby-participant-name">@user</span>
+                    @if (user == Session.ManagerUsername)
+                    {
+                        <span class="lobby-participant-badge lobby-badge-host">Host</span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="lobby-empty-state">
+            <span class="lobby-empty-icon">⏳</span>
+            <p>Waiting for players to join…</p>
+        </div>
+    }
+
+    <button class="tos-btn-secondary lobby-refresh-btn mt-3" @onclick="OnRefresh">↻ Refresh</button>
+</div>
 
 @code {
     [Parameter, EditorRequired] public string SessionId { get; set; } = default!;
     [Parameter, EditorRequired] public Session? Session { get; set; }
     [Parameter, EditorRequired] public EventCallback OnRefresh { get; set; }
+
+    [Inject] IJSRuntime JS { get; set; } = default!;
+
+    private bool _copied = false;
+
+    private string JoinLink => NavigationManager.GetUriWithQueryParameters(
+        NavigationManager.ToAbsoluteUri("/join-session").ToString(),
+        new Dictionary<string, object?> { ["gameId"] = SessionId });
+
+    private string QrCodeUrl => $"https://api.qrserver.com/v1/create-qr-code/?size=160x160&color=e8c96d&bgcolor=1a1612&data={Uri.EscapeDataString(JoinLink)}";
+
+    private async Task CopyLink()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", JoinLink);
+        _copied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        _copied = false;
+        StateHasChanged();
+    }
 }

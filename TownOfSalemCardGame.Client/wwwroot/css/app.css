@@ -1508,3 +1508,184 @@ code {
 .tc-player-status-msg:last-child {
     border-bottom: none;
 }
+
+/* ========================================================
+   Session Lobby
+   ======================================================== */
+
+.lobby-header-panel {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lobby-session-id-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.lobby-session-id {
+    font-family: 'Cinzel', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--tos-gold-light);
+    letter-spacing: 0.1em;
+}
+
+.lobby-subtitle {
+    color: var(--tos-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.lobby-invite-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lobby-invite-input {
+    flex: 1;
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lobby-qr-wrap {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.lobby-qr-frame {
+    display: inline-block;
+    padding: 0.5rem;
+    background: var(--tos-surface-2);
+    border: 1px solid var(--tos-border);
+    border-radius: 0.5rem;
+}
+
+.lobby-qr-frame img {
+    display: block;
+    border-radius: 2px;
+}
+
+/* Participants */
+
+.lobby-participant-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.lobby-participant-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: var(--tos-surface-2);
+    border: 1px solid var(--tos-border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease;
+}
+
+.lobby-participant-item:hover {
+    border-color: var(--tos-border-glow);
+}
+
+.lobby-participant-index {
+    color: var(--tos-text-muted);
+    font-size: 0.75rem;
+    min-width: 1.2rem;
+    text-align: right;
+}
+
+.lobby-participant-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--tos-border-glow);
+    color: var(--tos-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.lobby-participant-name {
+    flex: 1;
+    color: var(--tos-text);
+    font-size: 0.95rem;
+}
+
+.lobby-participant-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+}
+
+.lobby-badge-host {
+    background: var(--tos-gold);
+    color: var(--tos-bg);
+}
+
+.lobby-participant-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    background: var(--tos-border-glow);
+    color: var(--tos-bg);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    font-family: sans-serif;
+}
+
+.lobby-empty-state {
+    text-align: center;
+    padding: 1.5rem 0;
+    color: var(--tos-text-muted);
+}
+
+.lobby-empty-icon {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.lobby-refresh-btn,
+.tos-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--tos-border-glow);
+    color: var(--tos-gold-light);
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lobby-refresh-btn:hover,
+.tos-btn-secondary:hover {
+    background: var(--tos-border-glow);
+    color: var(--tos-bg);
+}
+
+.lobby-copy-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
