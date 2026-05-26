@@ -152,6 +152,17 @@ public static class RoleDefinitions
             "The Medium can then relay these secrets to the Town during the day. " +
             "Dead players know the truth — the Medium's ability to channel their knowledge can be game-changing."
     };
+    public static readonly RoleInfo TimeTraveler = new()
+    {
+        Name = "Time Traveler",
+        Description = "Can undo the previous night's death once per game.",
+        Faction = "town",
+        FullDescription =
+        "The Time Traveler possesses a unique one-shot ability: once per game, they can travel back " +
+        "and undo the events of the previous night, bringing back all players who died that night. " +
+        "This is an enormously powerful ability that can reverse a devastating Mafia attack or Serial " +
+        "Killer rampage. The Time Traveler wins by surviving to the end of the game."
+    };
 
     public static readonly RoleInfo Retributionist = new()
     {
@@ -506,7 +517,7 @@ public static class RoleDefinitions
     public static readonly RoleInfo Hunter = new()
     {
         Name = "Hunter",
-        Description = "If killed at night, immediately shoots one of their attackers.",
+        Description = "If killed at night, immediately shoots one of their attackers. Wins by surviving to the end",
         Faction = "neutral",
         FullDescription =
             "The Hunter is a passive but deadly neutral. They have no active night ability — " +
@@ -516,22 +527,11 @@ public static class RoleDefinitions
             "The Hunter wins by surviving to the end."
     };
 
-    public static readonly RoleInfo TimeTraveler = new()
-    {
-        Name = "Time Traveler",
-        Description = "Can undo the previous night's death once per game.",
-        Faction = "neutral",
-        FullDescription =
-            "The Time Traveler possesses a unique one-shot ability: once per game, they can travel back " +
-            "and undo the events of the previous night, bringing back all players who died that night. " +
-            "This is an enormously powerful ability that can reverse a devastating Mafia attack or Serial " +
-            "Killer rampage. The Time Traveler wins by surviving to the end of the game."
-    };
 
     public static readonly RoleInfo Poisoner = new()
     {
         Name = "Poisoner",
-        Description = "Can poison one player each night. Poisoned players die the following night unless cured.",
+        Description = "Can poison one player each night. Poisoned players die the following night unless cured. Wins if everyone is dead",
         Faction = "neutral",
         FullDescription =
             "The Poisoner is a slow but relentless killer. Each night they choose a player to poison. " +
@@ -544,7 +544,7 @@ public static class RoleDefinitions
     {
         Name = "Chemist",
         Description = "Can cure one poisoned player each night, preventing their death from poison.",
-        Faction = "neutral",
+        Faction = "town",
         FullDescription =
             "The Chemist is the only counter to the Poisoner. Each night they visit a player and " +
             "administer an antidote, saving them from poison if they were poisoned. " +
@@ -555,8 +555,8 @@ public static class RoleDefinitions
     public static readonly RoleInfo Fool = new()
     {
         Name = "Fool",
-        Description = "Appears suspicious to everyone but is actually harmless.",
-        Faction = "neutral",
+        Description = "Appears suspicious to everyone but is actually harmless townie.",
+        Faction = "town",
         FullDescription =
             "The Fool is entirely harmless despite seeming dangerous. They appear suspicious to Sheriffs " +
             "and Investigators, and their role may appear as a threatening role to investigators — " +
@@ -642,12 +642,13 @@ public static class RoleDefinitions
         Townie, HatefulTownie, PeacefulTownie, Sheriff, Doctor, Investigator,
         Escort, Mayor, Bodyguard, Vigilante, Veteran, Medium, Retributionist,
         Transporter, Jailor, Tracker, Lookout, Crusader, Psychic, TrapMaster, Coroner,
+        TimeTraveler,Chemist, Fool,
         // Mafia
         Mafia, Godfather, Consigliere, Blackmailer, Consort, Framer,
         Disguiser, Forger, Janitor, Hypnotist, Ambusher,
         // Neutral
         SerialKiller, Arsonist, Witch, Jester, Executioner, Amnesiac,
-        GuardianAngel, Survivor, Hunter, TimeTraveler, Poisoner, Chemist, Fool,
+        GuardianAngel, Survivor, Hunter, Poisoner,
         // Coven
         CovenLeader, Medusa, Necromancer, HexMaster, PotionMaster
     };
