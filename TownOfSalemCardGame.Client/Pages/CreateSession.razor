@@ -43,65 +43,17 @@ else
     private Session? Session;
     private HubConnection? hubConnection;
 
-    // Role selection for manager
-    private List<RoleInfo> AvailableRoles = new()
-    {
-        // Town
-        new RoleInfo { Name = "Townie", Description = "An innocent citizen. Find and vote out the mafia.", Count = 0 },
-        new RoleInfo { Name = "Hateful Townie", Description = "An innocent citizen who must vote guilty on all executions or they lose their will to fight. Wins with the Town.", Count = 0 },
-        new RoleInfo { Name = "Peaceful Townie", Description = "An innocent citizen who cannot bring themselves to vote guilty. Must abstain from all execution votes. Wins with the Town.", Count = 0 },
-        new RoleInfo { Name = "Sheriff", Description = "Can investigate one player per night to determine if they are suspicious.", Count = 0 },
-        new RoleInfo { Name = "Doctor", Description = "Can heal one player each night, preventing them from dying.", Count = 0 },
-        new RoleInfo { Name = "Investigator", Description = "Can investigate one player per night and receive a clue about their role.", Count = 0 },
-        new RoleInfo { Name = "Escort", Description = "Can distract one player each night, preventing them from using their ability.", Count = 0 },
-        new RoleInfo { Name = "Mayor", Description = "Can reveal themselves to receive three votes during the day.", Count = 0 },
-        new RoleInfo { Name = "Bodyguard", Description = "Can protect one player each night, killing any attacker who targets them.", Count = 0 },
-        new RoleInfo { Name = "Vigilante", Description = "Can shoot and kill one player each night, but feels guilt for killing town members.", Count = 0 },
-        new RoleInfo { Name = "Veteran", Description = "Can go on alert at night, killing anyone who visits them.", Count = 0 },
-        new RoleInfo { Name = "Medium", Description = "Can speak with the dead at night and relay messages to the living.", Count = 0 },
-        new RoleInfo { Name = "Retributionist", Description = "Can resurrect one dead Town member.", Count = 0 },
-        // new RoleInfo { Name = "Transporter", Description = "Can swap two players' positions at night, redirecting all actions between them.", Count = 0 },
-        new RoleInfo { Name = "Jailor", Description = "Can jail a player at night, preventing all actions on or by them, and may execute them.", Count = 0 },
-        // new RoleInfo { Name = "Tracker", Description = "Can track one player to see who they visited last night.", Count = 0 },
-        new RoleInfo { Name = "Lookout", Description = "Can watch a player to see who visited them last night.", Count = 0 },
-        // new RoleInfo { Name = "Crusader", Description = "Can protect a player and attack one of their visitors each night.", Count = 0 },
-        // new RoleInfo { Name = "Psychic", Description = "Receives visions at night revealing groups of innocent or evil players.", Count = 0 },
-        new RoleInfo { Name = "Trap Master", Description = "Can place a trap on a player that kills and reveals any evil visitor.", Count = 0 },
-        new RoleInfo { Name = "Coroner", Description = "Can examine a dead body at night to learn who visited them when they died.", Count = 0 },
-        new RoleInfo { Name = "Fool", Description = "Appears suspicious to everyone but is actually harmless.", Count = 0 },
-        // Mafia
-        new RoleInfo { Name = "Mafia", Description = "A member of the mafia. Eliminate citizens and avoid detection.", Count = 0 },
-        new RoleInfo { Name = "Godfather", Description = "The leader of the Mafia. Appears innocent to investigations and orders the nightly kill.", Count = 0 },
-        // new RoleInfo { Name = "Consigliere", Description = "Can investigate a player at night to learn their exact role.", Count = 0 },
-        new RoleInfo { Name = "Blackmailer", Description = "Can silence one player each night, preventing them from speaking during the day.", Count = 0 },
-        new RoleInfo { Name = "Consort", Description = "Can distract one player each night, preventing them from using their ability.", Count = 0 },
-        new RoleInfo { Name = "Framer", Description = "Can frame a player at night, making them appear suspicious to investigators.", Count = 0 },
-        // new RoleInfo { Name = "Disguiser", Description = "Can disguise themselves as a Town member, making investigators think they are that player.", Count = 0 },
-        // new RoleInfo { Name = "Forger", Description = "Can forge a player's last will at night, replacing their final message.", Count = 0 },
-        new RoleInfo { Name = "Janitor", Description = "Can clean a dead body at night, hiding the victim's role and last will from the town.", Count = 0 },
-        // new RoleInfo { Name = "Hypnotist", Description = "Can give a player a false feedback message at night to mislead them.", Count = 0 },
-        new RoleInfo { Name = "Ambusher", Description = "Can ambush a player's house, killing one of their visitors and revealing the ambush.", Count = 0 },
-        // Neutral
-        new RoleInfo { Name = "Serial Killer", Description = "A lone killer who eliminates one player each night. Wins alone.", Count = 0 },
-        new RoleInfo { Name = "Arsonist", Description = "Can douse players in gasoline and ignite them all at once. Wins alone.", Count = 0 },
-        new RoleInfo { Name = "Witch", Description = "Can control a player each night, forcing them to target another.", Count = 0 },
-        new RoleInfo { Name = "Jester", Description = "Wins by getting lynched by the town during the day.", Count = 0 },
-        new RoleInfo { Name = "Executioner", Description = "Has a target and wins by getting that specific player lynched by the town.", Count = 0 },
-        // new RoleInfo { Name = "Amnesiac", Description = "Has forgotten their role and can remember a dead player's role to become it.", Count = 0 },
-        new RoleInfo { Name = "Guardian Angel", Description = "Has a target they protect. Wins if their target survives to the end of the game.", Count = 0 },
-        new RoleInfo { Name = "Survivor", Description = "Has no special ability, but wins by simply surviving to the end of the game.", Count = 0 },
-        new RoleInfo { Name = "Hunter", Description = "If killed at night, immediately shoots one of their attackers.", Count = 0 },
-        new RoleInfo { Name = "Time Traveler", Description = "Can undo the previous night's death once per game.", Count = 0 },
-        new RoleInfo { Name = "Poisoner", Description = "Can poison one player each night. Poisoned players die the following night unless cured.", Count = 0 },
-        new RoleInfo { Name = "Chemist", Description = "Can cure one poisoned player each night, preventing their death from poison.", Count = 0 },
-        // Coven
-        // new RoleInfo { Name = "Potion Master", Description = "Has three potions: heal, reveal role, and kill. Can use one per night.", Count = 0 },
-        // new RoleInfo { Name = "Poisoner", Description = "Can poison a player, causing them to die the following night unless healed.", Count = 0 },
-        // new RoleInfo { Name = "Coven Leader", Description = "The leader of the Coven. Can control a player and, with the Necronomicon, kill them.", Count = 0 },
-        // new RoleInfo { Name = "Medusa", Description = "Can stone gaze all visitors to her house, killing them. With Necronomicon, can petrify from afar.", Count = 0 },
-        // new RoleInfo { Name = "Necromancer", Description = "Can use the ability of a dead player to target someone each night.", Count = 0 },
-        // new RoleInfo { Name = "Hex Master", Description = "Can hex all players; when all living players are hexed, they all die simultaneously.", Count = 0 },
-    };
+    // Role selection for manager — sourced from the central RoleDefinitions registry
+    private List<RoleInfo> AvailableRoles = RoleDefinitions.ActiveRoles
+        .Select(r => new RoleInfo
+        {
+            Name = r.Name,
+            Description = r.Description,
+            FullDescription = r.FullDescription,
+            Faction = r.Faction,
+            Count = 0
+        })
+        .ToList();
 
     // Holds player-role assignments for the manager
     private List<PlayerRoleAssignment>? playerAssignments;

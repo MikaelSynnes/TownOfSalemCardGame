@@ -1,0 +1,169 @@
+/* ── Help / Role Compendium page ─────────────────────────────────────── */
+
+.help-cards-page {
+    padding: 1.5rem 1rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.help-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.help-header h2 {
+    font-size: 2rem;
+    color: #e8d9a0;
+    text-shadow: 0 0 12px rgba(200,168,76,.5);
+    margin-bottom: .4rem;
+}
+
+.help-subtitle {
+    color: #a0a890;
+    margin-bottom: 1rem;
+}
+
+/* ── Faction filter buttons ── */
+.help-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: .75rem;
+}
+
+.faction-filter-btn {
+    padding: .35rem .9rem;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background: #2a2a2a;
+    color: #ccc;
+    cursor: pointer;
+    font-size: .85rem;
+    transition: background .15s, border-color .15s, color .15s;
+}
+
+.faction-filter-btn.faction-town        { border-color: #2e5c2e; }
+.faction-filter-btn.faction-town.active { background: #2e5c2e; color: #a0f0a0; }
+.faction-filter-btn.faction-mafia        { border-color: #3949ab; }
+.faction-filter-btn.faction-mafia.active { background: #3949ab; color: #a0a8f0; }
+.faction-filter-btn.faction-neutral        { border-color: #8b6914; }
+.faction-filter-btn.faction-neutral.active { background: #8b6914; color: #e8d9a0; }
+.faction-filter-btn.faction-coven        { border-color: #6a1aad; }
+.faction-filter-btn.faction-coven.active { background: #6a1aad; color: #ce93d8; }
+
+.faction-filter-btn:hover {
+    filter: brightness(1.2);
+}
+
+/* ── Faction sections ── */
+.help-faction-section {
+    margin-bottom: 2.5rem;
+}
+
+.help-faction-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid;
+}
+
+.faction-title-town    { color: #4caf50; border-color: #2e5c2e; }
+.faction-title-mafia   { color: #7986cb; border-color: #3949ab; }
+.faction-title-neutral { color: #c9a84c; border-color: #8b6914; }
+.faction-title-coven   { color: #ce93d8; border-color: #6a1aad; }
+
+/* ── Cards grid ── */
+.help-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+/* ── Individual help card ── */
+.help-card {
+    background: #1a1a1a;
+    border-radius: 10px;
+    border: 2px solid #2e2e2e;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.help-card:hover {
+    box-shadow: 0 0 14px rgba(200,168,76,.25);
+}
+
+.help-card.faction-town    { border-color: #2e5c2e; }
+.help-card.faction-town:hover { border-color: #4caf50; }
+.help-card.faction-mafia   { border-color: #3949ab; }
+.help-card.faction-mafia:hover { border-color: #7986cb; }
+.help-card.faction-neutral { border-color: #8b6914; }
+.help-card.faction-neutral:hover { border-color: #c9a84c; }
+.help-card.faction-coven   { border-color: #6a1aad; }
+.help-card.faction-coven:hover { border-color: #ce93d8; }
+
+.help-card-inactive {
+    opacity: .65;
+}
+
+.help-card-expanded {
+    box-shadow: 0 0 18px rgba(200,168,76,.35);
+}
+
+/* ── Art strip ── */
+.help-card-art {
+    width: 100%;
+    line-height: 0;
+}
+
+.help-card-art svg,
+.help-card-role-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ── Card body ── */
+.help-card-body {
+    padding: .75rem 1rem;
+}
+
+.help-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: .35rem;
+}
+
+.help-card-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #e8d9a0;
+    flex: 1;
+}
+
+.help-card-chevron {
+    font-size: .75rem;
+    color: #888;
+    margin-left: .4rem;
+}
+
+.help-card-short-desc {
+    font-size: .82rem;
+    color: #a0a890;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.help-divider {
+    border-color: #333;
+    margin: .6rem 0;
+}
+
+.help-card-full-desc p {
+    font-size: .85rem;
+    color: #ccc;
+    line-height: 1.6;
+    margin: 0;
+}

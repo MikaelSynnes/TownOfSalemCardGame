@@ -1,0 +1,111 @@
+@page "/help/cards"
+@using TownOfSalemCardGame.Shared
+@using TownOfSalemCardGame.Client.Components
+
+<div class="help-cards-page">
+    <div class="help-header">
+        <h2>📖 Role Compendium</h2>
+        <p class="help-subtitle">Every role in Town of Salem — click a card to reveal its full description.</p>
+
+        <div class="help-filters">
+            @foreach (var faction in _factions)
+            {
+                <button class="faction-filter-btn faction-@faction @(_activeFilter == faction ? "active" : "")"
+                        @onclick="() => SetFilter(faction)">
+                    @FactionLabel(faction)
+                </button>
+            }
+        </div>
+    </div>
+
+    @foreach (var faction in _factions)
+    {
+        var roles = RoleDefinitions.AllRoles
+            .Where(r => r.IsActive && r.Faction == faction && (_activeFilter == "all" || _activeFilter == faction))
+            .ToList();
+
+        if (roles.Count == 0) continue;
+
+        <section class="help-faction-section">
+            <h3 class="help-faction-title faction-title-@faction">@FactionLabel(faction)</h3>
+            <div class="help-cards-grid">
+                @foreach (var role in roles)
+                {
+                    var isExpanded = _expandedRole == role.Name;
+                    <div class="help-card faction-@faction @(!role.IsActive ? "help-card-inactive" : "") @(isExpanded ? "help-card-expanded" : "")"
+                         @onclick="() => ToggleExpand(role.Name)">
+
+                        <div class="help-card-art">
+                            @if (_imageErrors.Contains(role.Name))
+                            {
+                                @((MarkupString)RoleCardArt.Get(role.Name))
+                            }
+                            else
+                            {
+                                <img src="Images/@(role.Name.Replace(" ", "")).png"
+                                     alt="@role.Name"
+                                     class="help-card-role-img"
+                                     @onerror="() => OnImageError(role.Name)" />
+                            }
+                        </div>
+
+                        <div class="help-card-body">
+                            <div class="help-card-header">
+                                <span class="help-card-name">@role.Name</span>
+                                @if (!role.IsActive)
+                                {
+                                    <span class="badge bg-secondary ms-2" title="Not yet available in sessions">Coming Soon</span>
+                                }
+                                <span class="help-card-chevron">@(isExpanded ? "▲" : "▼")</span>
+                            </div>
+
+                            <p class="help-card-short-desc">@role.Description</p>
+
+                            @if (isExpanded)
+                            {
+                                <div class="help-card-full-desc">
+                                    <hr class="help-divider" />
+                                    <p>@role.FullDescription</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>
+
+@code {
+    private static readonly string[] _factions = { "town", "mafia", "neutral", "coven" };
+
+    private string _activeFilter = "all";
+    private string? _expandedRole;
+    private readonly HashSet<string> _imageErrors = new();
+
+    private void OnImageError(string roleName)
+    {
+        _imageErrors.Add(roleName);
+        StateHasChanged();
+    }
+
+    private void SetFilter(string faction)
+    {
+        _activeFilter = _activeFilter == faction ? "all" : faction;
+        _expandedRole = null;
+    }
+
+    private void ToggleExpand(string roleName)
+    {
+        _expandedRole = _expandedRole == roleName ? null : roleName;
+    }
+
+    private static string FactionLabel(string faction) => faction switch
+    {
+        "town"    => "⚖️ Town",
+        "mafia"   => "🌹 Mafia",
+        "neutral" => "⚔️ Neutral",
+        "coven"   => "🔮 Coven",
+        _         => faction
+    };
+}

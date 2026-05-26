@@ -330,6 +330,15 @@ public class RoleInfo
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int Count { get; set; }
+
+    /// <summary>In-depth description shown on the help/cards page.</summary>
+    public string FullDescription { get; set; } = string.Empty;
+
+    /// <summary>Faction identifier: "town", "mafia", "neutral", or "coven".</summary>
+    public string Faction { get; set; } = "neutral";
+
+    /// <summary>Whether this role is currently selectable in a session.</summary>
+    public bool IsActive { get; set; } = true;
 }
 
 public class StartGameRequest

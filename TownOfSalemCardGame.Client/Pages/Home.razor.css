@@ -96,3 +96,22 @@
     background: rgba(201,168,76,0.1);
     box-shadow: 0 0 18px rgba(201,168,76,0.35);
 }
+
+.home-actions-secondary {
+    margin-top: 1.5rem;
+}
+
+.btn-home-compendium {
+    background: transparent;
+    color: #a8c8a0;
+    border: 2px solid #3a6a3a;
+    box-shadow: 0 0 8px rgba(58,106,58,0.2);
+    font-size: 0.95rem;
+    padding: 0.6rem 1.6rem;
+    min-width: 0;
+}
+
+.btn-home-compendium:hover {
+    background: rgba(58,106,58,0.15);
+    box-shadow: 0 0 18px rgba(58,106,58,0.4);
+}
