@@ -25,7 +25,7 @@ public static class RoleDefinitions
     public static readonly RoleInfo HatefulTownie = new()
     {
         Name = "Hateful Townie",
-        Description = "An innocent citizen who must vote guilty on at least one execution or they lose their will to fight. Wins with the Town.",
+        Description = "An innocent citizen who must vote guilty on all executions or they lose their will to fight. Wins with the Town.",
         Faction = "town",
         FullDescription =
             "The Hateful Townie is a Town member driven by righteous anger. They must vote guilty " +
@@ -120,13 +120,13 @@ public static class RoleDefinitions
     public static readonly RoleInfo Vigilante = new()
     {
         Name = "Vigilante",
-        Description = "Can shoot and kill one player each night, but feels guilt for killing town members.",
+        Description = "Can shoot and kill one player each game, but feels guilt for killing town members.",
         Faction = "town",
         FullDescription =
-            "The Vigilante takes justice into their own hands. Each night they may choose to shoot " +
-            "and kill one player. If they kill a member of the Town, they are consumed by guilt and " +
-            "die the following night. They have a limited number of bullets. " +
-            "Use your shots only when you are very confident your target is evil."
+            "The Vigilante takes justice into their own hands.they may choose to shoot " +
+            "and kill one player.+" +
+        "Use your shots only when you are very confident your target is evil."
+
     };
 
     public static readonly RoleInfo Veteran = new()
@@ -494,7 +494,7 @@ public static class RoleDefinitions
     public static readonly RoleInfo Survivor = new()
     {
         Name = "Survivor",
-        Description = "Has no special ability, but wins by simply surviving to the end of the game.",
+        Description = "Cannot be killed during the night, but wins by simply surviving to the end of the game.",
         Faction = "neutral",
         FullDescription =
             "The Survivor has only one goal: stay alive. They have no night ability, but they do have " +
